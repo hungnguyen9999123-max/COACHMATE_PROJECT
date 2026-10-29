@@ -1,7 +1,7 @@
 import type { CourseType, ScheduleType, SkillLevel, ValidationStatus } from './types';
 
 export const DEFAULT_COURSE_COVER_IMAGE =
-  'https://i.pinimg.com/736x/06/01/eb/0601eb8c56d7299258f1137e9f5630ae.jpg';
+  'https://t3.ftcdn.net/jpg/09/94/36/24/360_F_994362438_e4CsOO3qxWowuCsoYsQdFcsniNizbJ2O.jpg';
 
 export const AREAS = ['Quận 1', 'Quận 7', 'Bình Thạnh', 'Tân Bình', 'Thủ Đức'] as const;
 

@@ -1,4 +1,5 @@
 import { prependActivity } from './activity';
+import { DEFAULT_COURSE_COVER_IMAGE } from './constants';
 import { generateTournamentBracket, recordMatchResult } from './tournaments';
 import type { Court, DemoState, Referee, Tournament } from './types';
 
@@ -46,9 +47,7 @@ export function createTournamentByOrganizer(
     status: 'open',
     bracket: null,
     championRegistrationId: null,
-    coverImageUrl:
-      input.coverImageUrl?.trim() ||
-      'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=85',
+    coverImageUrl: input.coverImageUrl?.trim() || DEFAULT_COURSE_COVER_IMAGE,
   };
 
   const updatedState: DemoState = {
