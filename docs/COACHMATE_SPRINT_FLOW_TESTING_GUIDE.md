@@ -1,8 +1,8 @@
 # COACHMATE -- HƯỚNG DẪN KIỂM THỬ TOÀN BỘ FLOW CÁC SPRINT
 
 > **Mục đích:** Tài liệu hướng dẫn chạy và kiểm thử thủ công các luồng
-> hiện đã triển khai trong CoachMate, từ nền tảng Sprint 0 đến Student
-> Journey ở Sprint 1.4.\
+> đã triển khai trong CoachMate, gồm Student, Coach, Admin hệ thống và
+> Organizer giải đấu.\
 > **Phạm vi:** Frontend demo React + TypeScript + Vite, dữ liệu mẫu và
 > LocalStorage. Không có backend/API hoặc thanh toán thật.
 
@@ -32,16 +32,19 @@
                           tournament, activities, 
                           profile                 
 
-  Sprint 2                Coach Portal            Chưa triển khai trong
-                                                  tiến độ được cung cấp
+  Sprint 2                Coach Portal            Đã triển khai trong
+                                                  frontend hiện tại
 
-  Sprint 3                Admin / Tournament      Chưa triển khai trong
-                          Operations              tiến độ được cung cấp
+  Sprint 3                Organizer Tournament    Đã triển khai trong
+                          Operations              frontend hiện tại
+
+  Sprint 4                System Admin Portal     Đã triển khai; kiểm thử
+                                                  thủ công còn cần hoàn tất
   -----------------------------------------------------------------------
 
-**Lưu ý:** Các sprint 2 và 3 chỉ là phần tiếp theo dự kiến, không phải
-chức năng đã hoàn thành. Hãy cập nhật tài liệu này khi Codex triển khai
-thêm.
+**Lưu ý:** Admin là quản trị hệ thống; Organizer là Ban tổ chức giải đấu.
+Role switcher trong demo không phải xác thực hay phân quyền thật. Cập nhật
+trạng thái kiểm thử theo kết quả thực tế của từng build.
 
 ## 2. Chuẩn bị môi trường
 
@@ -242,25 +245,32 @@ tương tác được mô tả đều hoạt động.
 ### TC-1.2.3 -- Admin role
 
 -   [ ] Chuyển sang role Admin.
--   [ ] Navigation thay đổi theo Admin.
--   [ ] Ứng dụng mở destination đầu tiên của role.
--   [ ] Những trang chưa triển khai hiển thị placeholder rõ ràng.
+-   [ ] Mở Admin dashboard và các màn hình tài khoản, Coach, Student, khóa học, giao dịch, báo cáo, cấu hình.
+-   [ ] Thao tác trạng thái tài khoản/khóa học/cấu hình và refresh để kiểm tra lưu.
+-   [ ] Giao dịch hiển thị rõ là mô phỏng; hoàn tiền demo chỉ xuất hiện khi Organizer từ chối đăng ký giải.
 
-### TC-1.2.4 -- Persist role
+### TC-1.2.4 -- Organizer role
+
+-   [ ] Chuyển sang role Organizer.
+-   [ ] Navigation chỉ gồm dashboard và nghiệp vụ giải đấu.
+-   [ ] Tạo giải, quản lý đăng ký, sân/trọng tài, lịch, nhánh đấu và kết quả.
+-   [ ] Kiểm tra role switching không làm mất dữ liệu.
+
+### TC-1.2.5 -- Persist role
 
 -   [ ] Chọn một role.
 -   [ ] Refresh trang.
 -   [ ] Kiểm tra role được chọn vẫn được giữ.
 -   [ ] Chuyển role lần nữa và kiểm tra navigation cập nhật ngay.
 
-### TC-1.2.5 -- Sidebar desktop
+### TC-1.2.6 -- Sidebar desktop
 
 -   [ ] Thu gọn sidebar.
 -   [ ] Mở rộng sidebar.
 -   [ ] Kiểm tra icon và label.
 -   [ ] Kiểm tra vùng nội dung thích ứng với sidebar.
 
-### TC-1.2.6 -- Mobile navigation
+### TC-1.2.7 -- Mobile navigation
 
 -   [ ] Mở website ở viewport mobile.
 -   [ ] Mở mobile drawer.
@@ -268,14 +278,14 @@ tương tác được mô tả đều hoạt động.
 -   [ ] Kiểm tra drawer đóng sau điều hướng nếu thiết kế yêu cầu.
 -   [ ] Kiểm tra không bị tràn ngang.
 
-### TC-1.2.7 -- Header interactions
+### TC-1.2.8 -- Header interactions
 
 -   [ ] Thử search input.
 -   [ ] Mở notifications.
 -   [ ] Mở profile menu.
 -   [ ] Kiểm tra các nút có phản hồi phù hợp.
 
-### TC-1.2.8 -- 404
+### TC-1.2.9 -- 404
 
 Mở một URL không tồn tại, ví dụ:
 
@@ -661,17 +671,27 @@ Tournament registration dùng được. - \[ \] Modal/drawer không bị cắt. 
 
 ------------------------------------------------------------------------
 
-# PHẦN G -- SPRINT TIẾP THEO
+# PHẦN G -- ADMIN QUẢN TRỊ HỆ THỐNG
 
-## 18. Sprint 2 -- Coach Portal (chưa triển khai theo tiến độ hiện tại)
+## 18. Sprint 4 -- Admin Portal
 
-Các luồng dự kiến cần kiểm thử sau khi được triển khai:
+-   [ ] Dashboard hiển thị số lượng tài khoản, khóa học, giao dịch và báo cáo từ dữ liệu hiện có.
+-   [ ] Tìm kiếm tài khoản; cập nhật role demo hoặc trạng thái truy cập; refresh để kiểm tra lưu.
+-   [ ] Xem danh sách Coach và Student; bảo toàn quan hệ enrollment.
+-   [ ] Đổi trạng thái khóa học; kiểm tra marketplace phản ánh thay đổi và khoản tiền lịch sử không đổi.
+-   [ ] Tra cứu giao dịch mô phỏng; xác nhận màn hình chỉ đọc và không có hoàn tiền giả.
+-   [ ] Xem báo cáo tài chính/phễu và cập nhật cấu hình.
+-   [ ] Xác nhận thông báo rõ: đây là demo LocalStorage, không xác thực/phân quyền thật.
+
+# PHẦN H -- COACH VÀ ORGANIZER
+
+## 19. Sprint 2 -- Coach Portal
 
 -   [ ] Coach Dashboard.
 -   [ ] Xem danh sách khóa học của HLV.
 -   [ ] Tạo khóa học.
--   [ ] Chỉnh sửa khóa học.
--   [ ] Cập nhật trạng thái/publish theo business rules.
+-   [ ] Sửa nội dung khóa học; xác nhận học phí/lịch/địa điểm/sức chứa không đổi.
+-   [ ] Xác nhận lifecycle publish/archive chưa nằm trong phạm vi triển khai hiện tại.
 -   [ ] Xem danh sách học viên.
 -   [ ] Xem lịch học.
 -   [ ] Quản lý lịch nếu được hỗ trợ.
@@ -679,32 +699,30 @@ Các luồng dự kiến cần kiểm thử sau khi được triển khai:
 -   [ ] Coach Pro/subscription nếu nằm trong feature map.
 -   [ ] Refresh và xác nhận dữ liệu được lưu.
 
-**Chưa đánh dấu Pass cho các mục trên khi trang vẫn là placeholder.**
+## 20. Sprint 3 -- Organizer / Tournament Operations
 
-## 19. Sprint 3 -- Admin / Tournament Operations (chưa triển khai theo tiến độ hiện tại)
+Kiểm thử các luồng giải đấu:
 
-Các luồng dự kiến cần kiểm thử sau khi được triển khai:
-
--   [ ] Admin Dashboard.
 -   [ ] Quản lý giải đấu.
 -   [ ] Tạo/chỉnh sửa giải đấu.
 -   [ ] Quản lý courts.
+-   [ ] Sửa sân; không xóa sân đang được trận đấu sử dụng.
 -   [ ] Quản lý referees.
+-   [ ] Sửa trọng tài; không xóa trọng tài đang được trận đấu phân công.
 -   [ ] Tạo và quản lý match schedule.
 -   [ ] Quản lý brackets.
+-   [ ] Duyệt đăng ký đang chờ; Student nhìn thấy trạng thái duyệt.
+-   [ ] Từ chối đăng ký đang chờ, xác nhận thanh toán được đánh dấu hoàn demo và slot được giải phóng.
+-   [ ] Không cho chốt giải khi còn đăng ký chờ duyệt.
 -   [ ] Nhập/cập nhật kết quả.
--   [ ] Financial Overview.
--   [ ] Assumptions.
--   [ ] Activity Log.
+-   [ ] Kiểm tra bảng thứ hạng: vô địch, á quân và đồng hạng theo vòng bị loại.
 -   [ ] Kiểm tra các thay đổi dữ liệu sau refresh.
-
-**Chưa đánh dấu Pass cho các mục trên khi trang vẫn là placeholder.**
 
 ------------------------------------------------------------------------
 
-# PHẦN H -- GHI NHẬN KẾT QUẢ TEST
+# PHẦN I -- GHI NHẬN KẾT QUẢ TEST
 
-## 20. Test summary
+## 21. Test summary
 
   Hạng mục                           Pass   Fail   N/A Ghi chú
   -------------------------------- ------ ------ ----- ---------
@@ -721,9 +739,10 @@ Các luồng dự kiến cần kiểm thử sau khi được triển khai:
   E2E -- Role switching                                
   Responsive                                           
   Sprint 2 -- Coach Portal                             
-  Sprint 3 -- Admin Portal                             
+  Sprint 3 -- Organizer Portal                         
+  Sprint 4 -- System Admin                             
 
-## 21. Bug log
+## 22. Bug log
 
   -----------------------------------------------------------------------------
   ID         Sprint /   Steps to    Expected   Actual     Severity   Status
@@ -736,7 +755,7 @@ Các luồng dự kiến cần kiểm thử sau khi được triển khai:
   BUG-003                                                            
   -----------------------------------------------------------------------------
 
-## 22. Điều kiện hoàn tất kiểm thử
+## 23. Điều kiện hoàn tất kiểm thử
 
 Một sprint chỉ nên được xác nhận hoàn tất kiểm thử khi:
 
@@ -749,7 +768,7 @@ Một sprint chỉ nên được xác nhận hoàn tất kiểm thử khi:
 
 ------------------------------------------------------------------------
 
-## 23. Lưu ý kiến trúc và giới hạn demo
+## 24. Lưu ý kiến trúc và giới hạn demo
 
 -   CoachMate hiện là frontend demo React + TypeScript + Vite.
 -   Node.js được dùng làm môi trường chạy công cụ phát triển/build; điều
@@ -761,8 +780,8 @@ Một sprint chỉ nên được xác nhận hoàn tất kiểm thử khi:
     thực tế.
 -   Dữ liệu LocalStorage phụ thuộc browser/profile đang sử dụng và có
     thể mất nếu người dùng xóa site data.
--   Các chức năng Coach/Admin và tournament operations chỉ được kiểm thử
-    sau khi những sprint tương ứng được triển khai.
+-   Admin và Organizer là các vai trò demo tách biệt; role switcher và
+    cài đặt LocalStorage không thay thế xác thực/phân quyền phía server.
 
 **Tài liệu này là checklist kiểm thử thủ công; kết quả Pass chỉ được
 đánh dấu sau khi thực sự thực hiện thao tác và quan sát kết quả.**

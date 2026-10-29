@@ -1,0 +1,247 @@
+/* Coach Portal Styles */
+.coach-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.coach-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coach-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-text-primary, #20332d);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.coach-header p {
+  color: var(--color-text-secondary, #74837c);
+  margin: 0;
+  font-size: 14px;
+}
+
+/* KPI Grid */
+.coach-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.coach-kpi-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e7ede9);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.coach-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 51, 45, 0.06);
+}
+
+.coach-kpi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-text-secondary, #74837c);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.coach-kpi-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg, #f7f9f8);
+  color: var(--color-primary, #168a63);
+}
+
+.coach-kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary, #20332d);
+  letter-spacing: -0.02em;
+}
+
+.coach-kpi-sub {
+  font-size: 12px;
+  color: var(--color-text-secondary, #74837c);
+}
+
+/* Live Price Preview Box */
+.price-preview-card {
+  background: linear-gradient(135deg, #e4f5ec 0%, #f7f9f8 100%);
+  border: 1px solid #c6f135;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 12px;
+}
+
+.price-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.price-preview-item {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e7ede9);
+}
+
+.price-preview-item label {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-secondary, #74837c);
+  margin-bottom: 4px;
+}
+
+.price-preview-item strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary, #20332d);
+}
+
+.price-preview-item.highlight strong {
+  color: var(--color-primary, #168a63);
+  font-size: 18px;
+}
+
+/* Coach Pro Card */
+.coach-pro-hero {
+  background: linear-gradient(135deg, #116b4d 0%, #168a63 100%);
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.coach-pro-content {
+  max-width: 600px;
+}
+
+.coach-pro-content h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 12px 0 8px 0;
+  color: #ffffff;
+}
+
+.coach-pro-content p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.coach-pro-badge {
+  background: var(--color-lime, #c6f135);
+  color: #20332d;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.coach-pro-price {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--color-lime, #c6f135);
+  margin: 16px 0;
+}
+
+.coach-pro-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.coach-pro-benefit-item {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e7ede9);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.coach-pro-benefit-item svg {
+  color: var(--color-primary, #168a63);
+  flex-shrink: 0;
+}
+
+/* Tables */
+.coach-table-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e7ede9);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.coach-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.coach-table th {
+  background: var(--color-bg, #f7f9f8);
+  padding: 12px 16px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #74837c);
+  border-bottom: 1px solid var(--color-border, #e7ede9);
+}
+
+.coach-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border, #e7ede9);
+  color: var(--color-text-primary, #20332d);
+}
+
+.coach-table tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .coach-pro-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .price-preview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.coach-profile-summary { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:16px; padding:22px; border:1px solid #dcebe1; border-radius:17px; background:radial-gradient(circle at 93% 10%,#dcefdc 0,transparent 28%),linear-gradient(125deg,#f3faf5,#fff 72%); }
+.coach-pro-payment-note { display:flex; align-items:flex-start; gap:7px; margin-top:-7px; color:rgba(255,255,255,.82); font-size:10px; line-height:1.55; }.coach-pro-payment-note svg { flex:0 0 auto; margin-top:1px; color:var(--color-lime,#c6f135); }
+.coach-profile-avatar { display:grid; place-items:center; }.coach-profile-summary-copy { display:grid; justify-items:start; gap:6px; }.coach-profile-summary-copy h3 { margin:0; font-size:19px; letter-spacing:-.03em; }.coach-profile-summary-copy > span:not(.cm-badge) { display:flex; align-items:center; gap:5px; color:var(--color-text-secondary); font-size:10px; }.coach-profile-summary-stat { display:grid; justify-items:center; min-width:90px; padding:12px; border-left:1px solid #e3ebe5; }.coach-profile-summary-stat strong { color:var(--color-primary-dark); font-size:24px; }.coach-profile-summary-stat span { color:var(--color-text-secondary); font-size:9px; }.coach-profile-layout { display:grid; grid-template-columns:minmax(0,1fr) 310px; align-items:start; gap:16px; }.coach-profile-form-card,.coach-profile-preview { padding:20px; }.coach-profile-section-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }.coach-profile-section-title > div { display:grid; gap:4px; }.coach-profile-section-title > div > span,.coach-profile-preview-label { color:var(--color-primary); font-size:8px; font-weight:800; letter-spacing:.13em; }.coach-profile-section-title h3 { margin:0; font-size:14px; }.coach-profile-section-title > svg { color:var(--color-primary); }.coach-profile-form { display:grid; gap:15px; }.coach-profile-form textarea { width:100%; min-height:115px; padding:11px 12px; resize:vertical; border:1px solid var(--color-border); border-radius:10px; color:var(--color-text-primary); background:white; font:inherit; font-size:12px; line-height:1.6; }.coach-profile-form textarea:focus { outline:2px solid rgb(22 138 99 / 18%); border-color:var(--color-primary); }.coach-profile-form-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:5px; }.coach-profile-form-footer > span { color:var(--color-text-secondary); font-size:9px; line-height:1.5; }.coach-profile-preview { position:sticky; top:92px; display:grid; align-content:start; gap:14px; }.coach-profile-preview-person { display:flex; align-items:center; gap:10px; }.coach-profile-preview-person > div { display:grid; gap:4px; }.coach-profile-preview-person strong { font-size:12px; }.coach-profile-preview-person span { display:flex; align-items:center; gap:4px; color:var(--color-text-secondary); font-size:9px; }.coach-profile-preview > p { margin:0; color:var(--color-text-secondary); font-size:10px; line-height:1.7; white-space:pre-wrap; }.coach-profile-specialties { display:flex; flex-wrap:wrap; gap:6px; }
+@media (max-width:900px) { .coach-profile-layout { grid-template-columns:minmax(0,1fr) 270px; } }
+@media (max-width:700px) { .coach-profile-summary { grid-template-columns:auto minmax(0,1fr); padding:17px; }.coach-profile-summary-stat { grid-column:1/-1; justify-self:stretch; grid-template-columns:auto 1fr; justify-items:start; align-items:center; gap:8px; padding:10px 0 0; border-top:1px solid #e3ebe5; border-left:0; }.coach-profile-summary-stat strong { font-size:18px; }.coach-profile-layout { grid-template-columns:1fr; }.coach-profile-preview { position:static; }.coach-profile-form-card,.coach-profile-preview { padding:16px; }.coach-profile-form-footer { align-items:flex-start; flex-direction:column; }.coach-profile-form-footer > .cm-button { width:100%; } }

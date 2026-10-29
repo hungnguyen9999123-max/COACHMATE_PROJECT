@@ -34,12 +34,22 @@ If a real frontend or API exists elsewhere, pause scaffolding and import that co
 | Coach | `/coach/courses/new` | Create course |
 | Coach | `/coach/courses/:courseId/edit` | Edit course after business rules are approved |
 | Coach | `/coach/pro` | Coach Pro subscription |
-| Admin | `/admin` | Revenue dashboard |
-| Admin | `/admin/tournaments` | Tournament management |
-| Admin | `/admin/tournaments/new` | Create tournament |
-| Admin | `/admin/tournaments/:tournamentId` | Registrations, finance, bracket, results |
-| Admin | `/admin/assumptions` | Configuration and validation tracking |
-| Admin | `/admin/activity` | Activity log |
+| Admin | `/admin` | System administration dashboard |
+| Admin | `/admin/accounts` | Account access and role management |
+| Admin | `/admin/coaches` | Coach account management |
+| Admin | `/admin/students` | Student account management |
+| Admin | `/admin/courses` | Course/content moderation |
+| Admin | `/admin/transactions` | Simulated transaction ledger |
+| Admin | `/admin/reports` | Platform finance and funnel reports |
+| Admin | `/admin/settings` | System and business configuration |
+| Admin | `/admin/activity` | System activity log |
+| Organizer | `/organizer` | Tournament operations dashboard |
+| Organizer | `/organizer/tournaments` | Tournament management |
+| Organizer | `/organizer/tournaments/new` | Create tournament |
+| Organizer | `/organizer/tournaments/:tournamentId` | Registrations, finance, bracket, results |
+| Organizer | `/organizer/operations` | Courts and referees |
+| Organizer | `/organizer/schedule` | Match schedule |
+| Organizer | `/organizer/results` | Brackets, results, and standings |
 
 ## Domain and state boundaries
 
@@ -137,19 +147,32 @@ Exit criteria:
 - Course creation produces an immediately discoverable marketplace course.
 - Edit/status behavior ships only after the business decisions below are approved.
 
-### Sprint 3 — organizer/admin experience
+### Sprint 3 — Organizer tournament operations
 
 1. Build revenue dashboard, breakdown, held-funds callout, funnel visualization, and profit semantics.
 2. Build tournament list, creation flow, finance editor, minimum/break-even warning, and demo registration tool.
 3. Build registration view, bracket, match schedule, court/referee assignment, result entry, progression, and champion state.
-4. Build business settings, assumption tracker, and activity log.
+4. Build tournament operations and organizer activity surfaces.
 5. Add confirmation dialogs for bracket generation, cost changes, and other consequential actions.
 
 Exit criteria:
 
 - Seeded finance totals and tournament break-even figures match the audit.
 - Bracket generation and every result progression path are deterministic and tested.
-- A student sees updated bracket/schedule state after admin operations.
+- A student sees updated bracket/schedule state after Organizer operations.
+
+### Sprint 4 — system administration
+
+1. Build the Admin overview and searchable account directory with role and access-status controls.
+2. Add dedicated Coach and Student account views, course/content moderation, and a simulated transaction ledger.
+3. Expose platform finance and funnel reports, system settings, and audit activity.
+4. Clearly disclose that account controls and role assignments are demo-only and do not provide authentication or authorization.
+
+Exit criteria:
+
+- Admin account, course, and setting changes persist in the browser demo without changing historical transactions.
+- Transaction views remain read-only and clearly labeled simulated.
+- Admin and Organizer routes, navigation, and role switching stay separate.
 
 ### Sprint 4 — quality and readiness
 
@@ -174,10 +197,10 @@ These do not block the preservation-first shell, but they do block a correct pro
 1. **Course lifecycle:** draft/published/full/completed/cancelled states, and whether coaches can edit price/capacity/schedule after enrollment.
 2. **Historical pricing:** confirm that paid registrations retain their original fee when organizers edit an event. The prototype currently rewrites them.
 3. **Payment accounting:** decide whether tournament payment fees are snapshotted per registration, matching course enrollments, or recomputed from current settings.
-4. **Refunds/cancellations:** define who may cancel, refund amount/timing, and the accounting/activity-log effects.
+4. **Refunds/cancellations:** Organizer rejection now marks a simulated tournament payment refunded and records an activity. Other cancellation/refund cases, timing, and accounting rules remain undefined; Admin transaction screens stay read-only.
 5. **Tournament scoring:** retain the MVP’s one-number-per-side result or implement real best-of-three game scores and badminton validation.
 6. **Registration controls:** duplicate prevention, waitlists, check-in, removal, partner replacement, and capacity enforcement at the service layer.
-7. **Identity:** authentication provider, role authorization, current-user profile, and organizer/coach ownership rules.
+7. **Identity:** authentication provider, secure role authorization, current-user profile, and organizer/coach ownership rules. LocalStorage role controls are demo-only.
 8. **API/backend:** endpoint contracts, persistence model, money representation, concurrency/versioning, and audit requirements.
 9. **Media:** image source/licensing and upload/storage policy for course and tournament covers.
 10. **Locale/time:** timezone, currency storage, localization strategy, and whether the product remains Vietnamese-only.
