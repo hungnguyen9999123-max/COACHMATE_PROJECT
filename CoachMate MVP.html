@@ -1,0 +1,515 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CoachMate MVP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: sticky top bar with role switch, tab row, content grid of cards; modal sheet for detail, checkout and forms. */
+:root{
+  --bg:#EDF1ED; --surface:#FFFFFF; --surface2:#F4F7F3; --ink:#10282A; --muted:#566D69; --line:#D3DDD6;
+  --top-bg:#0E2A2B; --top-fg:#F4F8F2; --btn:#0E2A2B; --on-btn:#F4F8F2; --lime:#C6F135; --on-lime:#0E2A2B; --green:#1B7358;
+  --ok-bg:#DDF3E4; --ok:#17603F; --warn-bg:#FFF0C9; --warn:#7A5200; --bad-bg:#FDE3DF; --bad:#9B2C1F; --info-bg:#DFEDF5; --info:#1F5B7A;
+  --scrim:rgba(8,24,25,.55); --shadow:0 1px 2px rgba(14,42,43,.06),0 10px 28px rgba(14,42,43,.07);
+  --display:'Oswald','Arial Narrow',Arial,sans-serif; --body:'Public Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#071617; --surface:#0F2829; --surface2:#143233; --ink:#E8F1EC; --muted:#93AFA9; --line:#25443F;
+  --top-bg:#0F2829; --top-fg:#E8F1EC; --btn:#C6F135; --on-btn:#0E2A2B; --green:#7FD8B2;
+  --ok-bg:#16402F; --ok:#9DE6BF; --warn-bg:#4A3A10; --warn:#F3D58A; --bad-bg:#4C2220; --bad:#FFB3A8; --info-bg:#183B4D; --info:#9ACBE6;
+  --scrim:rgba(0,0,0,.65); --shadow:none; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#071617; --surface:#0F2829; --surface2:#143233; --ink:#E8F1EC; --muted:#93AFA9; --line:#25443F;
+  --top-bg:#0F2829; --top-fg:#E8F1EC; --btn:#C6F135; --on-btn:#0E2A2B; --green:#7FD8B2;
+  --ok-bg:#16402F; --ok:#9DE6BF; --warn-bg:#4A3A10; --warn:#F3D58A; --bad-bg:#4C2220; --bad:#FFB3A8; --info-bg:#183B4D; --info:#9ACBE6;
+  --scrim:rgba(0,0,0,.65); --shadow:none; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);padding-block:0 48px}
+h1,h2,h3,h4{font-family:var(--display);font-weight:600;line-height:1.15;margin:0;text-wrap:balance;letter-spacing:.2px}
+h2{font-size:30px}h3{font-size:21px}h4{font-size:16px;letter-spacing:.6px;text-transform:uppercase}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{background:var(--top-bg);color:var(--top-fg)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-block:14px}
+.brand{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:1.5px}
+.brand b{color:var(--lime)}
+.roles{display:flex;gap:4px;background:rgba(255,255,255,.1);border-radius:999px;padding:4px;flex-wrap:wrap}
+.roles button{border:0;background:transparent;color:inherit;padding:8px 16px;border-radius:999px;cursor:pointer;font-weight:600;font-size:14px}
+.roles button[aria-pressed="true"]{background:var(--lime);color:var(--on-lime)}
+.notice{background:var(--surface2);border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+.notice .wrap{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding-block:8px}
+.link{background:none;border:0;padding:0;color:var(--green);font-weight:600;cursor:pointer;text-decoration:underline}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-block:16px 4px}
+.tabs button{border:1px solid var(--line);background:var(--surface);padding:9px 16px;border-radius:10px;cursor:pointer;font-weight:600;white-space:nowrap}
+.tabs button[aria-current="page"]{background:var(--btn);color:var(--on-btn);border-color:var(--btn)}
+main{padding-block:16px;display:flex;flex-direction:column;gap:20px}
+.sec{display:flex;flex-direction:column;gap:14px}
+.muted{color:var(--muted)}.sm{font-size:13px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.end{align-items:flex-end}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px}
+.grid.tiles{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.click{cursor:pointer;box-shadow:var(--shadow);transition:border-color .15s}
+.card.click:hover,.card.click:focus-visible{border-color:var(--green);outline:none}
+.tag{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--green)}
+.pro{background:var(--lime);color:var(--on-lime);font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px}
+.facts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:14px;color:var(--muted)}
+.price{font-family:var(--display);font-size:24px;font-weight:600}
+.chip{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;display:inline-block}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}.chip.warn{background:var(--warn-bg);color:var(--warn)}.chip.bad{background:var(--bad-bg);color:var(--bad)}.chip.info{background:var(--info-bg);color:var(--info)}
+.bar{height:8px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);overflow:hidden;flex:1;min-width:80px}
+.bar i{display:block;height:100%;background:var(--green)}
+.seat{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
+.btn{border:0;background:var(--btn);color:var(--on-btn);padding:11px 20px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.filters{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px}
+@media(max-width:820px){.filters{grid-template-columns:1fr 1fr}.filters .q{grid-column:1/-1}}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%;min-width:0;color:var(--ink)}
+textarea{min-height:76px;resize:vertical}
+form.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
+form.cols .full{grid-column:1/-1}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:4px}
+.tile .v{font-family:var(--display);font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tile.hl{background:var(--btn);color:var(--on-btn);border-color:var(--btn)}
+.tile.hl .muted{color:inherit;opacity:.8}
+.neg{color:var(--bad)}.pos{color:var(--ok)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right}
+tr.total td{font-weight:700;border-top:2px solid var(--ink)}
+.overlay{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));z-index:50}
+.sheet{background:var(--surface);border-radius:16px;max-width:720px;width:100%;max-height:calc(100% - 8px);overflow:auto;padding:24px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--line)}
+.sheet.wide{max-width:1000px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.kv div{background:var(--surface2);border-radius:10px;padding:10px 12px}
+.kv small{display:block;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.note{background:var(--info-bg);color:var(--info);padding:10px 12px;border-radius:10px;font-size:13px}
+.note.warn{background:var(--warn-bg);color:var(--warn)}
+.note.ok{background:var(--ok-bg);color:var(--ok)}
+.bracket{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px}
+.round{display:flex;flex-direction:column;gap:10px;min-width:210px;flex:1;justify-content:space-around}
+.mbox{border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:13px;overflow:hidden}
+.mbox div{display:flex;justify-content:space-between;gap:8px;padding:6px 10px}
+.mbox div+div{border-top:1px solid var(--line)}
+.mbox .w{font-weight:700;background:var(--ok-bg);color:var(--ok)}
+.mbox .mine span:first-child::after{content:" (bạn)";color:var(--green);font-weight:700}
+.mbox small{display:block;padding:4px 10px;background:var(--surface2);color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+.stars{color:var(--green);font-weight:700}
+.funnel{display:flex;flex-direction:column;gap:8px}
+.funnel .r{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:14px}
+@media(max-width:560px){.funnel .r{grid-template-columns:1fr}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--btn);color:var(--on-btn);padding:10px 18px;border-radius:999px;font-weight:600;z-index:60;max-width:calc(100% - 32px)}
+.log li{padding:6px 0;border-bottom:1px solid var(--line);font-size:14px;display:flex;gap:10px}
+.log ul{list-style:none;margin:0;padding:0}
+.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="brand">COACH<b>MATE</b></div>
+  <div class="roles" id="roles" role="group" aria-label="Chọn vai trò thử nghiệm"></div>
+</div></header>
+<div class="notice"><div class="wrap">
+  <span>Bản thử nghiệm CP3 · dữ liệu mẫu · thanh toán giả lập, không thu tiền thật.</span>
+  <button class="link" data-a="reset" type="button">Đặt lại dữ liệu mẫu</button>
+</div></div>
+<div class="wrap">
+  <nav class="tabs" id="nav" aria-label="Chức năng"></nav>
+  <main id="main"></main>
+</div>
+<div id="modal"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var LS='coachmate-cp3-mvp-v1';
+var AREAS=['Quận 1','Quận 7','Bình Thạnh','Tân Bình','Thủ Đức'];
+var LEVELS=['Mới bắt đầu','Cơ bản','Trung cấp','Nâng cao'];
+var TYPES={beginner:'Beginner Course',clinic:'Skill Clinic',group:'Group Course',individual:'Individual Course',advanced:'Advanced Training'};
+var SCHEDS=['Tối trong tuần','Cuối tuần'];
+var REFS=['Trọng tài Hải','Trọng tài Lan','Trọng tài Đạt'];
+var ASSUME=[
+ 'Người chơi muốn tìm khóa học cầu lông qua một nền tảng mới',
+ 'HLV sẵn sàng tạo khóa học trên CoachMate',
+ 'HLV chấp nhận mức hoa hồng',
+ 'Người học sẵn sàng thanh toán online',
+ 'Lớp nhóm đủ người đăng ký',
+ 'Người chơi sẵn sàng tham gia giải do CoachMate tổ chức',
+ 'Mức lệ phí giải phù hợp',
+ 'Chi phí sân và trọng tài cho phép giải có lãi',
+ 'Người chơi quay lại đăng ký khóa học hoặc giải tiếp theo'];
+var POOL=['Phạm Gia Huy','Võ Thanh Trúc','Đặng Minh Quân','Bùi Ngọc Anh','Hoàng Đức Long','Ngô Khánh Linh','Lý Anh Tuấn','Đỗ Hải Yến','Trịnh Bảo Châu','Vũ Quang Vinh','Mai Phương Thảo','Huỳnh Tấn Phát','Phan Thu Trang','Dương Quốc Khánh','Lâm Gia Bảo','Tạ Thùy Dương','Cao Nhật Minh','Đinh Hồng Nhung','Châu Việt Hùng','Kim Ngân','Tô Hoài Nam','Lương Bích Ngọc','Ông Gia Khiêm','Quách Mỹ Linh','Thái Đình Phong','Diệp Khánh Vy','Hà Tuấn Kiệt','Âu Thanh Hằng','Từ Minh Triết','La Bảo Anh'];
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function vnd(n){return new Intl.NumberFormat('vi-VN').format(Math.round(n))+'đ'}
+function fdate(d){if(!d)return '';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
+function pct(a,b){return b?Math.round(a/b*100):0}
+
+/* ---------- data ---------- */
+function seed(){
+  var D={v:1,me:{name:'',phone:''},
+    settings:{commission:10,payFee:2,proPrice:99000},
+    coaches:[
+      {id:'c1',name:'Nguyễn Minh Khang',bio:'HLV cấp 1, 8 năm dạy cầu lông phong trào và sinh viên.',area:'Quận 7',rSum:58,rCnt:12},
+      {id:'c2',name:'Trần Thu Hà',bio:'5 năm dạy lớp nhóm nhỏ, mạnh về di chuyển và phòng thủ.',area:'Bình Thạnh',rSum:37,rCnt:8},
+      {id:'c3',name:'Lê Quốc Bảo',bio:'Cựu vận động viên cấp thành phố, 10 năm huấn luyện.',area:'Thủ Đức',rSum:92,rCnt:19}],
+    subs:[{id:'s1',coachId:'c1',amount:99000,months:1,date:'2026-10-01'}],
+    courses:[
+      {id:'k1',coachId:'c1',title:'Cầu lông cho người mới: 8 buổi nền tảng',type:'beginner',level:'Mới bắt đầu',area:'Quận 7',venue:'Sân CL Phú Mỹ Hưng',start:'2026-11-10',sessions:8,mins:90,days:'Thứ 3 - Thứ 5',time:'19:00-20:30',sched:'Tối trong tuần',max:8,min:4,price:1200000,goal:'Cầm vợt đúng, đánh được cầu cơ bản và hiểu luật chơi.',content:['Cách cầm vợt','Footwork cơ bản','Serve, clear, drop','Luật chơi cơ bản'],req:'Không yêu cầu'},
+      {id:'k2',coachId:'c3',title:'Smash Clinic: 4 buổi',type:'clinic',level:'Trung cấp',area:'Thủ Đức',venue:'CLB Cầu lông Linh Trung',start:'2026-11-14',sessions:4,mins:90,days:'Thứ 7',time:'08:00-09:30',sched:'Cuối tuần',max:6,min:3,price:800000,goal:'Tăng lực và độ chính xác của cú smash.',content:['Tư thế và phát lực','Smash thuận tay','Smash sau nhảy','Phối hợp smash và bồi cầu'],req:'Đã đánh được clear hết sân'},
+      {id:'k3',coachId:'c2',title:'Footwork và phòng thủ nhóm nhỏ',type:'group',level:'Cơ bản',area:'Bình Thạnh',venue:'Sân CL Bạch Đằng',start:'2026-11-12',sessions:10,mins:90,days:'Thứ 2 - Thứ 4',time:'18:30-20:00',sched:'Tối trong tuần',max:8,min:4,price:1500000,goal:'Di chuyển gọn hơn và đỡ được cầu khó.',content:['Bước chân 6 điểm','Đỡ cầu smash','Phòng thủ đôi','Bài tập phản xạ'],req:'Biết luật và đánh được cầu cơ bản'},
+      {id:'k4',coachId:'c3',title:'Kèm 1-1 chiến thuật đánh đôi',type:'individual',level:'Trung cấp',area:'Thủ Đức',venue:'CLB Cầu lông Linh Trung',start:'2026-11-16',sessions:6,mins:60,days:'Linh hoạt',time:'Theo lịch hẹn',sched:'Cuối tuần',max:1,min:1,price:3000000,goal:'Xoay vòng vị trí và phối hợp với bạn đánh đôi.',content:['Xoay vòng công thủ','Giao tiếp với đồng đội','Phân tích video trận đấu'],req:'Đã chơi đôi ít nhất 3 tháng'},
+      {id:'k5',coachId:'c1',title:'Luyện thi đấu nâng cao',type:'advanced',level:'Nâng cao',area:'Quận 7',venue:'Sân CL Phú Mỹ Hưng',start:'2026-11-18',sessions:12,mins:120,days:'Thứ 4 - Thứ 6',time:'19:00-21:00',sched:'Tối trong tuần',max:8,min:5,price:2400000,goal:'Chuẩn bị thể lực và chiến thuật cho giải phong trào.',content:['Thể lực chuyên biệt','Chiến thuật đơn','Tập trận có điều kiện','Quản lý áp lực'],req:'Đã tham gia ít nhất một giải phong trào'}],
+    enrollments:[],regs:[],tournaments:[],
+    funnel:{view:58,checkout:24,paid:16},
+    assume:{},log:[]};
+  var seedCount={k1:5,k2:6,k3:2,k4:0,k5:3},n=0,i,c;
+  D.courses.forEach(function(c){for(i=0;i<seedCount[c.id];i++){n++;D.enrollments.push({id:'e'+n,courseId:c.id,name:POOL[(n*3)%POOL.length],price:c.price,commission:Math.round(c.price*.1),payFee:Math.round(c.price*.02),mine:false,done:false,reviewed:false,sample:true})}});
+  D.tournaments=[
+    {id:'t1',name:'CoachMate Mini Cup #1',format:'singles',level:'Phong trào',date:'2026-12-06',venue:'Nhà thi đấu Quận 7 (thuê theo sự kiện)',fee:250000,deadline:'2026-11-25',max:32,min:20,courts:4,prize:'Cúp, huy chương và 1.500.000đ tiền thưởng',rules:'Đơn nam/nữ phong trào, thi đấu loại trực tiếp, 21 điểm, 3 set.',cost:{court:2000000,staff:600000,prize:1500000,misc:300000,ref:60000},status:'open',bracket:null},
+    {id:'t2',name:'Đôi Nam Nữ Cuối Năm',format:'doubles',level:'Phong trào',date:'2026-12-20',venue:'Nhà thi đấu Bình Thạnh (thuê theo sự kiện)',fee:400000,deadline:'2026-12-10',max:16,min:10,courts:3,prize:'Cúp và 2.000.000đ tiền thưởng',rules:'Đôi nam nữ phong trào, loại trực tiếp, 21 điểm, 3 set.',cost:{court:1800000,staff:500000,prize:2000000,misc:300000,ref:60000},status:'open',bracket:null}];
+  for(i=0;i<9;i++)D.regs.push({id:'r'+(i+1),tid:'t1',name:POOL[(i*2+1)%POOL.length],partner:'',mine:false,fee:250000,payFee:5000});
+  for(i=0;i<3;i++)D.regs.push({id:'r'+(i+20),tid:'t2',name:POOL[i+10],partner:POOL[i+16],mine:false,fee:400000,payFee:8000});
+  return D;
+}
+function load(){try{var s=localStorage.getItem(LS);if(s){var o=JSON.parse(s);if(o&&o.v===1)return o}}catch(e){}return seed()}
+var D=load();
+function save(){try{localStorage.setItem(LS,JSON.stringify(D))}catch(e){}}
+var U={role:'player',tabs:{player:'courses',coach:'overview',admin:'revenue'},coachId:'c1',f:{q:'',level:'',area:'',sched:'',max:''},modal:null};
+var uid=Date.now();function nid(p){uid++;return p+uid.toString(36)}
+function logEv(t){D.log.unshift({t:Date.now(),text:t});D.log=D.log.slice(0,80)}
+
+/* ---------- selectors / business logic ---------- */
+function coach(id){return D.coaches.find(function(c){return c.id===id})}
+function course(id){return D.courses.find(function(c){return c.id===id})}
+function tour(id){return D.tournaments.find(function(t){return t.id===id})}
+function reg(id){return D.regs.find(function(r){return r.id===id})}
+function enrolls(cid){return D.enrollments.filter(function(e){return e.courseId===cid})}
+function entries(tid){return D.regs.filter(function(r){return r.tid===tid})}
+function entryName(r){return r.partner?r.name+' / '+r.partner:r.name}
+function isPro(cid){return D.subs.some(function(s){return s.coachId===cid&&s.active!==false})}
+function rating(c){return c.rCnt?(c.rSum/c.rCnt).toFixed(1):'—'}
+function cstat(c){var n=enrolls(c.id).length;
+  if(n>=c.max)return{k:'bad',t:'Đã đầy'};
+  if(n<c.min)return{k:'warn',t:'Cần thêm '+(c.min-n)+' học viên để mở lớp'};
+  return{k:'ok',t:'Chắc chắn mở lớp'}}
+function tcalc(t){var S=D.settings,n=entries(t.id).length,rev=n*t.fee,pay=rev*S.payFee/100,ref=Math.max(0,n-1)*t.cost.ref,
+  fixed=t.cost.court+t.cost.staff+t.cost.prize+t.cost.misc,unit=t.fee*(1-S.payFee/100)-t.cost.ref,
+  be=unit>0?Math.ceil(fixed/unit):Infinity;
+  return{n:n,rev:rev,pay:pay,ref:ref,fixed:fixed,costs:pay+ref+fixed,profit:rev-pay-ref-fixed,be:be,unit:unit}}
+function totals(){var S=D.settings,o={gmv:0,comm:0,cpay:0,subs:0,tfee:0,hold:0,tpay:0,tcost:0},i;
+  D.enrollments.forEach(function(e){o.gmv+=e.price;o.comm+=e.commission;o.cpay+=e.payFee});
+  D.subs.forEach(function(s){o.subs+=s.amount});
+  D.tournaments.forEach(function(t){var c=tcalc(t);
+    if(t.status==='open'){o.hold+=c.rev}else{o.tfee+=c.rev;o.tpay+=c.pay;o.tcost+=c.ref+c.fixed}});
+  o.revenue=o.comm+o.subs+o.tfee;o.cost=o.cpay+o.tpay+o.tcost;o.profit=o.revenue-o.cost;return o}
+function rname(total,r){var left=total-r;return left===1?'Chung kết':left===2?'Bán kết':left===3?'Tứ kết':'Vòng '+(r+1)}
+function hhmm(m){var h=Math.floor(m/60),mm=m%60;return (h<10?'0':'')+h+':'+(mm<10?'0':'')+mm}
+
+function genBracket(t){
+  var es=entries(t.id).map(function(r){return r.id}),n=es.length,size=2;
+  while(size<n)size*=2;
+  var rounds=[],cnt=size/2,r,i;
+  for(r=0;cnt>=1;r++,cnt/=2){rounds.push([]);for(i=0;i<cnt;i++)rounds[r].push({a:null,b:null,sa:null,sb:null,w:null})}
+  for(i=0;i<size/2;i++){var m=rounds[0][i];m.a=es[i]||null;m.b=es[size-1-i]||null;
+    if(m.a&&!m.b){m.w=m.a;m.bye=true}else if(m.b&&!m.a){m.w=m.b;m.bye=true}}
+  t.bracket={size:size,rounds:rounds};propagate(t);
+  var k=0;rounds.forEach(function(rd){rd.forEach(function(m){if(m.bye)return;
+    m.court=(k%t.courts)+1;m.time=hhmm(8*60+Math.floor(k/t.courts)*40);m.ref=REFS[k%REFS.length];k++})});
+  t.status='closed'}
+function propagate(t){var rs=t.bracket.rounds;
+  rs.forEach(function(rd,r){if(r===0)return;rd.forEach(function(m,i){m.a=rs[r-1][2*i].w;m.b=rs[r-1][2*i+1].w})})}
+
+/* ---------- views ---------- */
+function chip(k,t){return '<span class="chip '+k+'">'+esc(t)+'</span>'}
+function sel(id,opts,val,all){return '<select id="'+id+'">'+(all?'<option value="">'+all+'</option>':'')+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>'}
+
+function courseCard(c){var co=coach(c.coachId),n=enrolls(c.id).length,st=cstat(c);
+  return '<article class="card click" tabindex="0" role="button" data-a="course" data-id="'+c.id+'">'+
+  '<div class="row between"><span class="tag">'+TYPES[c.type]+'</span>'+(isPro(c.coachId)?'<span class="pro">Nổi bật</span>':'')+'</div>'+
+  '<h3>'+esc(c.title)+'</h3><p class="muted sm">'+esc(co.name)+' · <span class="stars">★ '+rating(co)+'</span></p>'+
+  '<ul class="facts"><li>'+c.level+' · '+c.area+'</li><li>'+esc(c.days)+' · '+esc(c.time)+'</li><li>'+c.sessions+' buổi × '+c.mins+' phút · từ '+fdate(c.start)+'</li></ul>'+
+  '<div class="seat"><div class="bar"><i style="width:'+Math.min(100,pct(n,c.max))+'%"></i></div><span>'+n+'/'+c.max+'</span></div>'+
+  '<div class="row between end"><strong class="price">'+vnd(c.price)+'</strong>'+chip(st.k,st.t)+'</div></article>'}
+
+function courseList(){var F=U.f,list=D.courses.filter(function(c){
+    var co=coach(c.coachId);
+    if(F.q&&(c.title+' '+co.name+' '+c.venue).toLowerCase().indexOf(F.q.toLowerCase())<0)return false;
+    if(F.level&&c.level!==F.level)return false;if(F.area&&c.area!==F.area)return false;
+    if(F.sched&&c.sched!==F.sched)return false;if(F.max&&c.price>+F.max)return false;return true});
+  list.sort(function(a,b){return (isPro(b.coachId)?1:0)-(isPro(a.coachId)?1:0)||a.start.localeCompare(b.start)});
+  return list.length?'<div class="grid">'+list.map(courseCard).join('')+'</div>':'<div class="empty">Không có khóa học phù hợp bộ lọc. Thử bỏ bớt điều kiện.</div>'}
+
+function vPlayerCourses(){var F=U.f;
+  return '<section class="sec"><div class="row between"><h2>Tìm khóa học cầu lông</h2><span class="muted sm">HLV tạo khóa, học viên chọn khóa phù hợp và đăng ký</span></div>'+
+  '<div class="filters"><label class="f q">Tìm kiếm<input id="fq" type="search" placeholder="Tên khóa, HLV, sân" value="'+esc(F.q)+'"></label>'+
+  '<label class="f">Trình độ'+sel('fl',LEVELS,F.level,'Tất cả')+'</label>'+
+  '<label class="f">Khu vực'+sel('fa',AREAS,F.area,'Tất cả')+'</label>'+
+  '<label class="f">Lịch học'+sel('fs',SCHEDS,F.sched,'Tất cả')+'</label>'+
+  '<label class="f">Học phí tối đa<select id="fm"><option value="">Không giới hạn</option>'+[1000000,1500000,2500000].map(function(v){return '<option value="'+v+'"'+(String(v)===String(F.max)?' selected':'')+'>'+vnd(v)+'</option>'}).join('')+'</select></label></div>'+
+  '<div id="courseList">'+courseList()+'</div></section>'}
+
+function tourCard(t){var c=tcalc(t),st=t.status==='open'?{k:'ok',t:'Đang mở đăng ký'}:t.status==='closed'?{k:'info',t:'Đã chốt, đang thi đấu'}:{k:'warn',t:'Đã kết thúc'};
+  return '<article class="card click" tabindex="0" role="button" data-a="tour" data-id="'+t.id+'">'+
+  '<div class="row between"><span class="tag">'+(t.format==='singles'?'Đơn':'Đôi')+' · '+esc(t.level)+'</span>'+chip(st.k,st.t)+'</div>'+
+  '<h3>'+esc(t.name)+'</h3><ul class="facts"><li>'+fdate(t.date)+' · '+esc(t.venue)+'</li><li>Hạn đăng ký '+fdate(t.deadline)+'</li><li>Giải thưởng: '+esc(t.prize)+'</li></ul>'+
+  '<div class="seat"><div class="bar"><i style="width:'+Math.min(100,pct(c.n,t.max))+'%"></i></div><span>'+c.n+'/'+t.max+' lượt</span></div>'+
+  '<div class="row between end"><strong class="price">'+vnd(t.fee)+'</strong><span class="muted sm">'+(t.format==='doubles'?'mỗi cặp':'mỗi người')+'</span></div></article>'}
+function vPlayerTours(){return '<section class="sec"><div class="row between"><h2>Giải đấu do CoachMate tổ chức</h2><span class="muted sm">CoachMate là ban tổ chức: nhận đăng ký, xếp bảng, thuê sân và trọng tài</span></div><div class="grid">'+D.tournaments.map(tourCard).join('')+'</div></section>'}
+
+function vMine(){var es=D.enrollments.filter(function(e){return e.mine}),rs=D.regs.filter(function(r){return r.mine});
+  var h='<section class="sec"><h2>Khóa học của tôi</h2>';
+  h+=es.length?'<div class="grid">'+es.map(function(e){var c=course(e.courseId),co=coach(c.coachId);
+    return '<div class="card"><span class="tag">'+TYPES[c.type]+'</span><h3>'+esc(c.title)+'</h3><p class="muted sm">'+esc(co.name)+' · '+esc(c.venue)+'</p>'+
+    '<p class="sm">Bắt đầu '+fdate(c.start)+' · '+esc(c.days)+' · '+esc(c.time)+'</p><p class="sm">Đã thanh toán '+vnd(e.price)+' · '+chip(cstat(c).k,cstat(c).t)+'</p>'+
+    (e.done?(e.reviewed?chip('ok','Đã đánh giá HLV'):'<button class="btn sm" data-a="review" data-id="'+e.id+'">Đánh giá HLV</button>')+
+      '<div class="note">Bạn đã học xong khóa này. Thử sức ở <a href="#" data-a="gotour" style="color:inherit;font-weight:700">CoachMate Mini Cup</a>.</div>'
+      :'<button class="btn alt sm" data-a="complete" data-id="'+e.id+'">Mô phỏng: hoàn thành khóa học</button>')+'</div>'}).join('')+'</div>'
+    :'<div class="empty">Bạn chưa đăng ký khóa học nào.</div>';
+  h+='<h2>Giải đấu của tôi</h2>';
+  h+=rs.length?'<div class="grid">'+rs.map(function(r){var t=tour(r.tid),line='Chờ chốt danh sách thi đấu';
+    if(t.bracket){var found=null;t.bracket.rounds.forEach(function(rd,ri){rd.forEach(function(m){if(!m.bye&&(m.a===r.id||m.b===r.id)&&m.w==null&&!found)found={m:m,ri:ri}})});
+      line=found?(rname(t.bracket.rounds.length,found.ri)+' · Sân '+found.m.court+' lúc '+found.m.time+' · '+found.m.ref):(t.champion===r.id?'Vô địch!':'Đã hoàn thành lượt đấu')}
+    return '<div class="card click" tabindex="0" role="button" data-a="tour" data-id="'+t.id+'"><h3>'+esc(t.name)+'</h3><p class="sm muted">'+fdate(t.date)+' · '+esc(entryName(r))+'</p><p class="sm">Đã đóng '+vnd(r.fee)+'</p><p class="note">'+esc(line)+'</p></div>'}).join('')+'</div>'
+    :'<div class="empty">Bạn chưa đăng ký giải nào.</div>';
+  return h+'</section>'}
+
+/* coach */
+function vCoach(){var c=coach(U.coachId),tab=U.tabs.coach;
+  var head='<section class="sec"><div class="row between"><h2>Không gian HLV</h2><label class="f" style="min-width:220px">Đang xem với tư cách<select id="coachSel">'+D.coaches.map(function(x){return '<option value="'+x.id+'"'+(x.id===c.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></label></div>';
+  if(tab==='overview'){var cs=D.courses.filter(function(x){return x.coachId===c.id}),g=0,m=0,st=0;
+    cs.forEach(function(x){enrolls(x.id).forEach(function(e){g+=e.price;m+=e.commission;st++})});
+    return head+'<div class="grid tiles"><div class="tile"><span class="muted sm">Khóa đang đăng</span><span class="v">'+cs.length+'</span></div><div class="tile"><span class="muted sm">Học viên đã đăng ký</span><span class="v">'+st+'</span></div><div class="tile"><span class="muted sm">Học phí thu được</span><span class="v">'+vnd(g)+'</span></div><div class="tile"><span class="muted sm">Phí nền tảng '+D.settings.commission+'%</span><span class="v">'+vnd(m)+'</span></div><div class="tile hl"><span class="muted sm">HLV thực nhận</span><span class="v">'+vnd(g-m)+'</span></div></div>'+
+    '<div class="tablewrap"><table><thead><tr><th>Khóa học</th><th>Học viên</th><th>Trạng thái</th><th class="n">Học phí</th><th class="n">Phí nền tảng</th><th class="n">Thực nhận</th></tr></thead><tbody>'+
+    (cs.length?cs.map(function(x){var es=enrolls(x.id),gg=0,mm=0;es.forEach(function(e){gg+=e.price;mm+=e.commission});var s=cstat(x);
+      return '<tr><td><strong>'+esc(x.title)+'</strong><br><span class="muted sm">'+(es.map(function(e){return esc(e.name)}).join(', ')||'Chưa có học viên')+'</span></td><td>'+es.length+'/'+x.max+' (mở lớp từ '+x.min+')</td><td>'+chip(s.k,s.t)+'</td><td class="n">'+vnd(gg)+'</td><td class="n">'+vnd(mm)+'</td><td class="n">'+vnd(gg-mm)+'</td></tr>'}).join(''):'<tr><td colspan="6">Chưa có khóa học. Mở tab Tạo khóa học.</td></tr>')+'</tbody></table></div></section>'}
+  if(tab==='create'){return head+'<form class="cols card" data-form="course"><h3 class="full">Tạo khóa học mới</h3>'+
+    '<label class="f full">Tên khóa học<input name="title" required value="Cầu lông cơ bản cho người đi làm"></label>'+
+    '<label class="f">Loại khóa<select name="type">'+Object.keys(TYPES).map(function(k){return '<option value="'+k+'"'+(k==='group'?' selected':'')+'>'+TYPES[k]+'</option>'}).join('')+'</select></label>'+
+    '<label class="f">Trình độ'+sel('lv',LEVELS,'Cơ bản').replace('id="lv"','name="level"')+'</label>'+
+    '<label class="f">Khu vực'+sel('ar',AREAS,'Quận 7').replace('id="ar"','name="area"')+'</label>'+
+    '<label class="f">Lịch học'+sel('sc',SCHEDS,'Tối trong tuần').replace('id="sc"','name="sched"')+'</label>'+
+    '<label class="f full">Địa điểm<input name="venue" required value="Sân CL Phú Mỹ Hưng"></label>'+
+    '<label class="f">Ngày bắt đầu<input type="date" name="start" required value="2026-12-01"></label>'+
+    '<label class="f">Ngày học<input name="days" value="Thứ 3 - Thứ 5"></label>'+
+    '<label class="f">Khung giờ<input name="time" value="19:00-20:30"></label>'+
+    '<label class="f">Số buổi<input type="number" name="sessions" min="1" value="8"></label>'+
+    '<label class="f">Phút mỗi buổi<input type="number" name="mins" min="30" step="15" value="90"></label>'+
+    '<label class="f">Học viên tối đa<input type="number" name="max" min="1" value="8"></label>'+
+    '<label class="f">Tối thiểu để mở lớp<input type="number" name="min" min="1" value="4"></label>'+
+    '<label class="f">Học phí cả khóa (đ)<input type="number" name="price" id="priceIn" min="0" step="50000" value="1200000"></label>'+
+    '<div class="note full" id="pricePrev"></div>'+
+    '<label class="f full">Mục tiêu khóa học<textarea name="goal">Cải thiện kỹ thuật cơ bản và sự tự tin khi chơi.</textarea></label>'+
+    '<label class="f full">Nội dung (mỗi dòng một ý)<textarea name="content">Cầm vợt và tư thế\nDi chuyển cơ bản\nServe và clear</textarea></label>'+
+    '<label class="f full">Yêu cầu đầu vào<input name="req" value="Không yêu cầu"></label>'+
+    '<div class="full row"><button class="btn" type="submit">Đăng khóa học</button><span class="muted sm">Khóa học hiện ngay trong danh sách của học viên.</span></div></form></section>'}
+  var pro=isPro(c.id);
+  return head+'<div class="card"><h3>Coach Pro '+(pro?chip('ok','Đang bật'):'')+'</h3><p>Gói trả phí hằng tháng cho HLV: <strong>'+vnd(D.settings.proPrice)+'/tháng</strong>.</p><ul class="facts"><li>Ưu tiên hiển thị khóa học, có nhãn Nổi bật</li><li>Analytics và công cụ quảng bá</li><li>Quản lý học viên nâng cao, báo cáo doanh thu</li></ul>'+
+    '<div class="row">'+(pro?'<button class="btn alt" data-a="proOff">Tắt Coach Pro</button>':'<button class="btn" data-a="proOn">Đăng ký Coach Pro (giả lập)</button>')+'</div></div></section>'}
+
+/* admin */
+function vAdmin(){var tab=U.tabs.admin,T=totals(),S=D.settings;
+  if(tab==='revenue'){var F=D.funnel;
+    return '<section class="sec"><h2>Doanh thu và chi phí của CoachMate</h2><div class="grid tiles">'+
+    '<div class="tile"><span class="muted sm">Tổng học phí qua nền tảng</span><span class="v">'+vnd(T.gmv)+'</span></div>'+
+    '<div class="tile"><span class="muted sm">Doanh thu CoachMate</span><span class="v">'+vnd(T.revenue)+'</span></div>'+
+    '<div class="tile"><span class="muted sm">Chi phí</span><span class="v">'+vnd(T.cost)+'</span></div>'+
+    '<div class="tile hl"><span class="muted sm">Lãi/lỗ ước tính</span><span class="v">'+(T.profit<0?'−':'')+vnd(Math.abs(T.profit))+'</span></div></div>'+
+    '<div class="tablewrap card"><table><thead><tr><th>Nguồn thu</th><th>Cách tính</th><th class="n">Số tiền</th></tr></thead><tbody>'+
+    '<tr><td>Hoa hồng khóa học</td><td>'+S.commission+'% học phí, tính khi có đăng ký</td><td class="n">'+vnd(T.comm)+'</td></tr>'+
+    '<tr><td>Coach Pro</td><td>'+vnd(S.proPrice)+'/tháng mỗi HLV</td><td class="n">'+vnd(T.subs)+'</td></tr>'+
+    '<tr><td>Lệ phí giải đã ghi nhận</td><td>Giải đã chốt hoặc kết thúc</td><td class="n">'+vnd(T.tfee)+'</td></tr>'+
+    '<tr class="total"><td colspan="2">Tổng doanh thu</td><td class="n">'+vnd(T.revenue)+'</td></tr>'+
+    '<tr><td>Phí cổng thanh toán</td><td>'+S.payFee+'% mỗi giao dịch</td><td class="n">'+vnd(T.cpay+T.tpay)+'</td></tr>'+
+    '<tr><td>Chi phí vận hành giải</td><td>Sân, trọng tài, giải thưởng, nhân sự, khác</td><td class="n">'+vnd(T.tcost)+'</td></tr>'+
+    '<tr class="total"><td colspan="2">Tổng chi phí</td><td class="n">'+vnd(T.cost)+'</td></tr></tbody></table></div>'+
+    (T.hold?'<div class="note">Đang tạm giữ '+vnd(T.hold)+' lệ phí của các giải chưa chốt. Chưa tính là doanh thu.</div>':'')+
+    '<div class="note warn">Doanh thu chưa phải lợi nhuận. Cần kiểm chứng mức hoa hồng và kinh tế của giải trước khi mở rộng.</div>'+
+    '<div class="card"><h3>Phễu đăng ký khóa học</h3><div class="funnel">'+
+    [['Xem chi tiết khóa',F.view],['Bắt đầu đăng ký',F.checkout],['Thanh toán xong',F.paid]].map(function(x){return '<div class="r"><span>'+x[0]+'</span><div class="bar"><i style="width:'+pct(x[1],F.view)+'%"></i></div><span>'+x[1]+' ('+pct(x[1],F.view)+'%)</span></div>'}).join('')+'</div><p class="muted sm">Số liệu nền là dữ liệu mẫu, tăng thêm theo thao tác của người thử.</p></div></section>'}
+  if(tab==='tours'){return '<section class="sec"><div class="row between"><h2>Vận hành giải đấu</h2><button class="btn" data-a="newT">Tạo giải mới</button></div>'+D.tournaments.map(adminTour).join('')+'</section>'}
+  if(tab==='assume'){var stv=['Chưa kiểm chứng','Đang kiểm chứng','Đã xác nhận','Bị bác bỏ'];
+    return '<section class="sec"><h2>Giả định kinh doanh</h2><div class="card"><h3>Thông số mô hình</h3><p class="muted sm">Thay đổi áp dụng cho giao dịch mới và các bảng tính doanh thu.</p><div class="cols" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px">'+
+    '<label class="f">Hoa hồng khóa học (%)<input type="number" data-set="commission" min="0" max="30" value="'+S.commission+'"></label>'+
+    '<label class="f">Phí cổng thanh toán (%)<input type="number" data-set="payFee" min="0" max="10" step="0.5" value="'+S.payFee+'"></label>'+
+    '<label class="f">Giá Coach Pro (đ/tháng)<input type="number" data-set="proPrice" min="0" step="10000" value="'+S.proPrice+'"></label></div>'+
+    '<div class="note">Ví dụ: khóa 1.000.000đ × 6 học viên = 6.000.000đ, CoachMate nhận '+vnd(6000000*S.commission/100)+'.</div></div>'+
+    '<div class="card"><h3>Giả định cần kiểm chứng</h3><div class="tablewrap"><table><thead><tr><th>#</th><th>Giả định</th><th>Trạng thái</th></tr></thead><tbody>'+
+    ASSUME.map(function(a,i){var v=D.assume[i]||stv[0];return '<tr><td>'+(i+1)+'</td><td>'+esc(a)+'</td><td><select data-assume="'+i+'">'+stv.map(function(o){return '<option'+(o===v?' selected':'')+'>'+o+'</option>'}).join('')+'</select></td></tr>'}).join('')+'</tbody></table></div></div></section>'}
+  return '<section class="sec"><h2>Nhật ký thao tác</h2><div class="card log">'+(D.log.length?'<ul>'+D.log.map(function(l){var d=new Date(l.t);return '<li><span class="muted">'+d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+'</span><span>'+esc(l.text)+'</span></li>'}).join('')+'</ul>':'<p class="muted">Chưa có thao tác. Thử đăng ký một khóa học ở vai trò Học viên.</p>')+'</div></section>'}
+
+function adminTour(t){var c=tcalc(t),es=entries(t.id),stc=t.status==='open'?{k:'ok',t:'Đang mở đăng ký'}:t.status==='closed'?{k:'info',t:'Đang thi đấu'}:{k:'warn',t:'Đã kết thúc'};
+  var h='<div class="card" id="adm-'+t.id+'"><div class="row between"><h3>'+esc(t.name)+'</h3>'+chip(stc.k,stc.t)+'</div>'+
+  '<p class="muted sm">'+fdate(t.date)+' · '+esc(t.venue)+' · '+(t.format==='singles'?'Đơn':'Đôi')+' · '+c.n+'/'+t.max+' lượt đăng ký (ngưỡng tổ chức '+t.min+')</p>'+
+  '<div class="tablewrap"><table><tbody>'+
+  '<tr><td>Lệ phí thu ('+c.n+' × '+vnd(t.fee)+')</td><td class="n">'+vnd(c.rev)+'</td></tr>'+
+  '<tr><td>Phí thanh toán '+D.settings.payFee+'%</td><td class="n">−'+vnd(c.pay)+'</td></tr>'+
+  '<tr><td>Trọng tài ('+Math.max(0,c.n-1)+' trận × '+vnd(t.cost.ref)+')</td><td class="n">−'+vnd(c.ref)+'</td></tr>'+
+  '<tr><td>Chi phí cố định (sân, nhân sự, giải thưởng, khác)</td><td class="n">−'+vnd(c.fixed)+'</td></tr>'+
+  '<tr class="total"><td>Lợi nhuận dự kiến</td><td class="n '+(c.profit<0?'neg':'pos')+'">'+(c.profit<0?'−':'')+vnd(Math.abs(c.profit))+'</td></tr></tbody></table></div>'+
+  (c.be===Infinity?'<div class="note warn">Mỗi lượt đăng ký không đủ bù chi phí trọng tài. Cần tăng lệ phí.</div>':
+   '<div class="note '+(c.n>=c.be?'ok':'warn')+'">Hòa vốn từ '+c.be+' lượt đăng ký. '+(t.min<c.be?'Ngưỡng tổ chức hiện là '+t.min+', thấp hơn điểm hòa vốn.':'Ngưỡng tổ chức đã đạt điểm hòa vốn.')+'</div>');
+  if(t.status==='open'){
+    h+='<form class="cols" data-form="cost" data-id="'+t.id+'">'+[['court','Thuê sân'],['staff','Nhân sự'],['prize','Giải thưởng'],['misc','Chi phí khác'],['ref','Trọng tài / trận']].map(function(x){return '<label class="f">'+x[1]+' (đ)<input type="number" name="'+x[0]+'" min="0" step="10000" value="'+t.cost[x[0]]+'"></label>'}).join('')+
+    '<label class="f">Lệ phí (đ)<input type="number" name="fee" min="0" step="10000" value="'+t.fee+'"></label><label class="f">Ngưỡng tổ chức<input type="number" name="min" min="2" value="'+t.min+'"></label>'+
+    '<div class="full row"><button class="btn alt sm" type="submit">Cập nhật chi phí</button></div></form>'+
+    '<div class="row"><button class="btn alt sm" data-a="simreg" data-id="'+t.id+'">Mô phỏng thêm 8 lượt đăng ký</button><button class="btn" data-a="gen" data-id="'+t.id+'"'+(c.n<4?' disabled':'')+'>Chốt đăng ký và tạo bảng đấu</button></div>'+
+    (c.n<t.min&&c.n>=4?'<div class="note warn">Mới đạt '+c.n+'/'+t.min+' lượt. Chốt lúc này sẽ dưới ngưỡng tổ chức.</div>':'')}
+  else{h+='<h4>Bảng đấu và lịch thi đấu</h4>'+bracketHtml(t)+'<h4>Nhập kết quả</h4>'+resultsHtml(t)}
+  return h+'</div>'}
+
+function matchBox(t,m){var na=m.a?entryName(reg(m.a)):'—',nb=m.b?entryName(reg(m.b)):(m.bye?'Miễn đấu':'—');
+  return '<div class="mbox"><div class="'+(m.w&&m.w===m.a?'w ':'')+(m.a&&reg(m.a).mine?'mine':'')+'"><span>'+esc(na)+'</span><span>'+(m.sa==null?'':m.sa)+'</span></div>'+
+  '<div class="'+(m.w&&m.w===m.b?'w ':'')+(m.b&&reg(m.b).mine?'mine':'')+'"><span>'+esc(nb)+'</span><span>'+(m.sb==null?'':m.sb)+'</span></div>'+
+  (m.bye?'':'<small>Sân '+m.court+' · '+m.time+' · '+esc(m.ref)+'</small>')+'</div>'}
+function bracketHtml(t){var b=t.bracket;return '<div class="bracket">'+b.rounds.map(function(rd,r){return '<div class="round"><h4>'+rname(b.rounds.length,r)+'</h4>'+rd.map(function(m){return matchBox(t,m)}).join('')+'</div>'}).join('')+'</div>'+
+  (t.champion?'<div class="note ok">Vô địch: '+esc(entryName(reg(t.champion)))+'</div>':'')}
+function resultsHtml(t){var b=t.bracket,out=[];
+  b.rounds.forEach(function(rd,r){rd.forEach(function(m,i){if(!m.a||!m.b||m.bye||m.w)return;
+    var nx=b.rounds[r+1]&&b.rounds[r+1][Math.floor(i/2)],locked=nx&&nx.w;
+    out.push('<form class="row" data-form="result" data-t="'+t.id+'" data-r="'+r+'" data-i="'+i+'"><span style="flex:1;min-width:200px"><strong>'+rname(b.rounds.length,r)+'</strong> · '+esc(entryName(reg(m.a)))+' vs '+esc(entryName(reg(m.b)))+'</span>'+
+      '<input name="sa" type="number" min="0" max="30" style="width:72px" value="'+(m.sa==null?'':m.sa)+'" '+(locked?'disabled':'')+' aria-label="Điểm bên A"><input name="sb" type="number" min="0" max="30" style="width:72px" value="'+(m.sb==null?'':m.sb)+'" '+(locked?'disabled':'')+' aria-label="Điểm bên B">'+
+      '<button class="btn alt sm" type="submit"'+(locked?' disabled':'')+'>Lưu</button></form>')})});
+  return out.length?'<div class="sec">'+out.join('')+'</div>':'<p class="muted sm">'+(t.champion?'Tất cả trận đã có kết quả.':'Chưa có trận nào đủ hai bên.')+'</p>'}
+
+function vTourModal(t){var c=tcalc(t),mineReg=D.regs.find(function(r){return r.tid===t.id&&r.mine});
+  var h='<div class="row between"><div><span class="tag">'+(t.format==='singles'?'Đơn':'Đôi')+' · '+esc(t.level)+'</span><h2>'+esc(t.name)+'</h2></div><button class="btn alt sm" data-a="close">Đóng</button></div>'+
+  '<div class="kv"><div><small>Ngày thi đấu</small>'+fdate(t.date)+'</div><div><small>Địa điểm</small>'+esc(t.venue)+'</div><div><small>Lệ phí</small>'+vnd(t.fee)+(t.format==='doubles'?' / cặp':'')+'</div><div><small>Hạn đăng ký</small>'+fdate(t.deadline)+'</div><div><small>Giải thưởng</small>'+esc(t.prize)+'</div><div><small>Đã đăng ký</small>'+c.n+'/'+t.max+'</div></div>'+
+  '<p><strong>Điều lệ:</strong> '+esc(t.rules)+'</p>';
+  if(t.status==='open'){
+    h+=c.n<t.min?'<div class="note warn">Giải chỉ diễn ra khi đủ '+t.min+' lượt đăng ký. Hiện có '+c.n+'. Không đủ sẽ hoàn lệ phí 100%.</div>':'<div class="note ok">Đã đủ ngưỡng tổ chức.</div>';
+    h+=mineReg?'<div class="note ok">Bạn đã đăng ký: '+esc(entryName(mineReg))+'</div>':'<div class="row"><button class="btn" data-a="treg" data-id="'+t.id+'"'+(c.n>=t.max?' disabled':'')+'>'+(c.n>=t.max?'Đã đủ số lượng':'Đăng ký tham gia')+'</button></div>'}
+  else{h+='<h4>Bảng đấu và lịch thi đấu</h4>'+bracketHtml(t)}
+  return h}
+
+/* modals */
+function modalHtml(){var M=U.modal;if(!M)return '';var b='';
+  if(M.type==='course'){var c=course(M.id),co=coach(c.coachId),n=enrolls(c.id).length,st=cstat(c),mine=D.enrollments.some(function(e){return e.mine&&e.courseId===c.id});
+    b='<div class="row between"><div><span class="tag">'+TYPES[c.type]+'</span><h2>'+esc(c.title)+'</h2></div><button class="btn alt sm" data-a="close">Đóng</button></div>'+
+    '<div class="kv"><div><small>Trình độ</small>'+c.level+'</div><div><small>Địa điểm</small>'+esc(c.venue)+', '+c.area+'</div><div><small>Lịch học</small>'+esc(c.days)+' · '+esc(c.time)+'</div><div><small>Thời lượng</small>'+c.sessions+' buổi × '+c.mins+' phút</div><div><small>Bắt đầu</small>'+fdate(c.start)+'</div><div><small>Sĩ số</small>'+n+'/'+c.max+' (mở lớp từ '+c.min+')</div></div>'+
+    '<div><h4>Mục tiêu</h4><p>'+esc(c.goal)+'</p></div><div><h4>Nội dung</h4><ul>'+c.content.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div><p><strong>Yêu cầu đầu vào:</strong> '+esc(c.req)+'</p>'+
+    '<div class="card" style="background:var(--surface2)"><strong>'+esc(co.name)+'</strong> <span class="stars">★ '+rating(co)+'</span> <span class="muted sm">('+co.rCnt+' đánh giá)</span><p class="sm muted">'+esc(co.bio)+'</p></div>'+
+    '<div class="row between"><div><strong class="price">'+vnd(c.price)+'</strong><p class="muted sm">Trọn khóa, khoảng '+vnd(c.price/c.sessions)+'/buổi</p></div>'+chip(st.k,st.t)+'</div>'+
+    '<div class="note">Lớp chỉ mở khi đủ '+c.min+' học viên. Không đủ lớp sẽ hoàn học phí 100%.</div>'+
+    (mine?'<div class="note ok">Bạn đã đăng ký khóa này.</div>':'<button class="btn" data-a="checkout" data-id="'+c.id+'"'+(n>=c.max?' disabled':'')+'>'+(n>=c.max?'Khóa đã đầy':'Đăng ký khóa học')+'</button>')}
+  else if(M.type==='checkout'||M.type==='treg'){var isC=M.type==='checkout',o=isC?course(M.id):tour(M.id),amt=isC?o.price:o.fee,dbl=!isC&&o.format==='doubles';
+    b='<div class="row between"><h2>'+(isC?'Đăng ký và thanh toán':'Đăng ký giải đấu')+'</h2><button class="btn alt sm" data-a="close">Đóng</button></div>'+
+    '<p><strong>'+esc(isC?o.title:o.name)+'</strong></p>'+
+    '<form class="cols" data-form="'+(isC?'pay':'tpay')+'" data-id="'+o.id+'">'+
+    '<label class="f">Họ tên'+(dbl?' (vận động viên 1)':'')+'<input name="name" required value="'+esc(D.me.name)+'" autocomplete="name"></label>'+
+    (dbl?'<label class="f">Họ tên vận động viên 2<input name="partner" required></label>':'')+
+    '<label class="f">Số điện thoại<input name="phone" inputmode="tel" value="'+esc(D.me.phone)+'" autocomplete="tel"></label>'+
+    '<label class="f full">Phương thức thanh toán<select name="method"><option>Ví MoMo</option><option>Chuyển khoản ngân hàng</option><option>Thẻ ATM / Visa</option></select></label>'+
+    '<div class="full tablewrap"><table><tbody><tr><td>'+(isC?'Học phí trọn khóa':'Lệ phí tham gia')+'</td><td class="n">'+vnd(amt)+'</td></tr><tr class="total"><td>Tổng thanh toán</td><td class="n">'+vnd(amt)+'</td></tr></tbody></table></div>'+
+    '<div class="full note">Thanh toán giả lập, không trừ tiền thật.</div>'+
+    '<div class="full row"><button class="btn" type="submit">Xác nhận thanh toán</button></div></form>'}
+  else if(M.type==='ok'){b='<h2>'+esc(M.title)+'</h2><div class="note ok">'+M.lines.map(esc).join('<br>')+'</div><div class="row"><button class="btn" data-a="'+M.cta+'">'+esc(M.ctaText)+'</button><button class="btn alt" data-a="close">Đóng</button></div>'}
+  else if(M.type==='tour'){return '<div class="overlay" data-a="overlay"><div class="sheet wide" role="dialog" aria-modal="true">'+vTourModal(tour(M.id))+'</div></div>'}
+  else if(M.type==='review'){b='<h2>Đánh giá HLV</h2><form class="cols" data-form="review" data-id="'+M.id+'"><label class="f">Số sao<select name="stars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label><label class="f full">Nhận xét<textarea name="text" placeholder="Bạn thấy khóa học thế nào?"></textarea></label><div class="full row"><button class="btn" type="submit">Gửi đánh giá</button><button class="btn alt" type="button" data-a="close">Hủy</button></div></form>'}
+  else if(M.type==='newT'){b='<div class="row between"><h2>Tạo giải mới</h2><button class="btn alt sm" data-a="close">Đóng</button></div><form class="cols" data-form="newT">'+
+    '<label class="f full">Tên giải<input name="name" required value="CoachMate Mini Cup #2"></label><label class="f">Thể thức<select name="format"><option value="singles">Đơn</option><option value="doubles">Đôi</option></select></label><label class="f">Trình độ<input name="level" value="Phong trào"></label>'+
+    '<label class="f">Ngày thi đấu<input type="date" name="date" required value="2027-01-10"></label><label class="f">Hạn đăng ký<input type="date" name="deadline" required value="2027-01-02"></label>'+
+    '<label class="f full">Địa điểm<input name="venue" required value="Nhà thi đấu thuê theo sự kiện"></label>'+
+    '<label class="f">Lệ phí (đ)<input type="number" name="fee" min="0" step="10000" value="250000"></label><label class="f">Số lượt tối đa<input type="number" name="max" min="4" value="32"></label><label class="f">Ngưỡng tổ chức<input type="number" name="min" min="2" value="24"></label><label class="f">Số sân<input type="number" name="courts" min="1" max="8" value="4"></label>'+
+    '<label class="f">Thuê sân (đ)<input type="number" name="court" min="0" step="10000" value="2000000"></label><label class="f">Nhân sự (đ)<input type="number" name="staff" min="0" step="10000" value="600000"></label><label class="f">Giải thưởng (đ)<input type="number" name="prizeAmt" min="0" step="10000" value="1500000"></label><label class="f">Chi phí khác (đ)<input type="number" name="misc" min="0" step="10000" value="300000"></label><label class="f">Trọng tài / trận (đ)<input type="number" name="ref" min="0" step="5000" value="60000"></label>'+
+    '<div class="full row"><button class="btn" type="submit">Tạo giải</button></div></form>'}
+  return '<div class="overlay" data-a="overlay"><div class="sheet" role="dialog" aria-modal="true">'+b+'</div></div>'}
+
+/* ---------- render ---------- */
+var ROLES=[['player','Học viên'],['coach','HLV'],['admin','Ban tổ chức']];
+var TABS={player:[['courses','Khóa học'],['tours','Giải đấu'],['mine','Của tôi']],coach:[['overview','Tổng quan'],['create','Tạo khóa học'],['pro','Coach Pro']],admin:[['revenue','Doanh thu'],['tours','Giải đấu'],['assume','Giả định'],['log','Nhật ký']]};
+function render(keepScroll){
+  document.getElementById('roles').innerHTML=ROLES.map(function(r){return '<button type="button" data-a="role" data-id="'+r[0]+'" aria-pressed="'+(U.role===r[0])+'">'+r[1]+'</button>'}).join('');
+  document.getElementById('nav').innerHTML=TABS[U.role].map(function(t){return '<button type="button" data-a="tab" data-id="'+t[0]+'"'+(U.tabs[U.role]===t[0]?' aria-current="page"':'')+'>'+t[1]+'</button>'}).join('');
+  var tab=U.tabs[U.role],h='';
+  if(U.role==='player')h=tab==='courses'?vPlayerCourses():tab==='tours'?vPlayerTours():vMine();
+  else if(U.role==='coach')h=vCoach();else h=vAdmin();
+  document.getElementById('main').innerHTML=h;
+  document.getElementById('modal').innerHTML=modalHtml();
+  if(U.role==='coach'&&tab==='create')prevPrice();
+}
+function prevPrice(){var el=document.getElementById('priceIn'),p=document.getElementById('pricePrev');if(!el||!p)return;var v=+el.value||0,c=v*D.settings.commission/100;
+  p.textContent='CoachMate giữ '+D.settings.commission+'% = '+vnd(c)+' mỗi học viên. HLV nhận '+vnd(v-c)+'.'}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},2600)}
+function closeM(){U.modal=null;render()}
+
+/* ---------- actions ---------- */
+function doEnroll(f,id){var c=course(id),S=D.settings;if(enrolls(c.id).length>=c.max){toast('Khóa đã đầy');return}
+  D.me.name=f.name;D.me.phone=f.phone||'';
+  D.enrollments.push({id:nid('e'),courseId:c.id,name:f.name,price:c.price,commission:Math.round(c.price*S.commission/100),payFee:Math.round(c.price*S.payFee/100),mine:true,done:false,reviewed:false});
+  D.funnel.paid++;logEv(f.name+' đăng ký "'+c.title+'" ('+vnd(c.price)+', hoa hồng '+vnd(c.price*S.commission/100)+')');save();
+  var st=cstat(c);U.modal={type:'ok',title:'Đăng ký thành công',lines:['Khóa: '+c.title,'Đã thanh toán '+vnd(c.price)+' ('+f.method+')',st.k==='warn'?'Lớp sẽ mở khi đủ '+c.min+' học viên. Không đủ sẽ hoàn tiền 100%.':'Lớp chắc chắn mở. Bắt đầu '+fdate(c.start)+'.'],cta:'toMine',ctaText:'Xem khóa học của tôi'};render()}
+function doTreg(f,id){var t=tour(id),S=D.settings;D.me.name=f.name;D.me.phone=f.phone||'';
+  D.regs.push({id:nid('r'),tid:t.id,name:f.name,partner:f.partner||'',mine:true,fee:t.fee,payFee:Math.round(t.fee*S.payFee/100)});
+  logEv(f.name+' đăng ký giải "'+t.name+'" ('+vnd(t.fee)+')');save();
+  U.modal={type:'ok',title:'Đăng ký giải thành công',lines:['Giải: '+t.name,'Đã đóng '+vnd(t.fee)+' ('+f.method+')','Lịch thi đấu sẽ gửi sau khi CoachMate chốt danh sách.'],cta:'toMine',ctaText:'Xem giải của tôi'};render()}
+
+document.addEventListener('click',function(ev){
+  var el=ev.target.closest('[data-a]');if(!el)return;var a=el.dataset.a,id=el.dataset.id;
+  if(a==='overlay'){if(ev.target===el)closeM();return}
+  if(a==='gotour'){ev.preventDefault();U.tabs.player='tours';render();return}
+  switch(a){
+    case 'role':U.role=id;U.modal=null;render();break;
+    case 'tab':U.tabs[U.role]=id;render();break;
+    case 'close':closeM();break;
+    case 'course':D.funnel.view++;save();U.modal={type:'course',id:id};render();break;
+    case 'checkout':D.funnel.checkout++;save();U.modal={type:'checkout',id:id};render();break;
+    case 'tour':U.modal={type:'tour',id:id};render();break;
+    case 'treg':U.modal={type:'treg',id:id};render();break;
+    case 'toMine':U.modal=null;U.role='player';U.tabs.player='mine';render();break;
+    case 'complete':var e=D.enrollments.find(function(x){return x.id===id});e.done=true;logEv('Học viên hoàn thành khóa "'+course(e.courseId).title+'"');save();render();toast('Đã đánh dấu hoàn thành');break;
+    case 'review':U.modal={type:'review',id:id};render();break;
+    case 'proOn':D.subs.push({id:nid('s'),coachId:U.coachId,amount:D.settings.proPrice,months:1,date:new Date().toISOString().slice(0,10)});logEv(coach(U.coachId).name+' đăng ký Coach Pro ('+vnd(D.settings.proPrice)+')');save();render();toast('Đã bật Coach Pro');break;
+    case 'proOff':D.subs.forEach(function(s){if(s.coachId===U.coachId)s.active=false});logEv(coach(U.coachId).name+' tắt Coach Pro');save();render();break;
+    case 'newT':U.modal={type:'newT'};render();break;
+    case 'simreg':var t=tour(id),k,add=Math.min(8,t.max-entries(t.id).length),base=entries(t.id).length;
+      for(k=0;k<add;k++)D.regs.push({id:nid('r'),tid:t.id,name:POOL[(base+k+5)%POOL.length]+' '+(base+k+1),partner:t.format==='doubles'?POOL[(base+k+11)%POOL.length]+' '+(base+k+1):'',mine:false,fee:t.fee,payFee:Math.round(t.fee*D.settings.payFee/100)});
+      logEv('Mô phỏng thêm '+add+' lượt đăng ký giải "'+t.name+'"');save();render();break;
+    case 'gen':var tt=tour(id);genBracket(tt);logEv('Chốt đăng ký, tạo bảng đấu "'+tt.name+'" ('+entries(tt.id).length+' lượt)');save();render();toast('Đã tạo bảng đấu, sân và trọng tài');break;
+    case 'reset':D=seed();U.modal=null;save();render();toast('Đã đặt lại dữ liệu mẫu');break;
+  }
+});
+document.addEventListener('keydown',function(ev){if(ev.key==='Enter'&&ev.target.matches&&ev.target.matches('[role=button][data-a]'))ev.target.click();if(ev.key==='Escape'&&U.modal)closeM()});
+
+document.addEventListener('submit',function(ev){
+  var form=ev.target.closest('form[data-form]');if(!form)return;ev.preventDefault();
+  var f=Object.fromEntries(new FormData(form).entries()),k=form.dataset.form,id=form.dataset.id;
+  if(k==='pay')doEnroll(f,id);
+  else if(k==='tpay')doTreg(f,id);
+  else if(k==='review'){var e=D.enrollments.find(function(x){return x.id===id}),co=coach(course(e.courseId).coachId);e.reviewed=true;co.rSum+=+f.stars;co.rCnt++;logEv('Đánh giá '+f.stars+' sao cho '+co.name);save();U.modal=null;render();toast('Cảm ơn bạn đã đánh giá')}
+  else if(k==='course'){var min=+f.min,max=+f.max;
+    if(!f.title.trim()||!f.venue.trim()||!(+f.price>=0)||min>max||min<1){toast('Kiểm tra lại tên khóa, địa điểm, sĩ số và học phí');return}
+    var c={id:nid('k'),coachId:U.coachId,title:f.title.trim(),type:f.type,level:f.level,area:f.area,venue:f.venue.trim(),start:f.start,sessions:+f.sessions,mins:+f.mins,days:f.days,time:f.time,sched:f.sched,max:max,min:min,price:+f.price,goal:f.goal,content:f.content.split('\n').map(function(s){return s.trim()}).filter(Boolean),req:f.req};
+    D.courses.push(c);logEv(coach(U.coachId).name+' đăng khóa "'+c.title+'" ('+vnd(c.price)+')');save();U.tabs.coach='overview';render();toast('Đã đăng khóa học')}
+  else if(k==='cost'){var t=tour(id);['court','staff','prize','misc','ref'].forEach(function(x){t.cost[x]=+f[x]||0});t.fee=+f.fee||0;t.min=+f.min||2;
+    D.regs.forEach(function(r){if(r.tid===t.id){r.fee=t.fee}});logEv('Cập nhật kế hoạch chi phí "'+t.name+'"');save();render();toast('Đã cập nhật')}
+  else if(k==='newT'){var nt={id:nid('t'),name:f.name,format:f.format,level:f.level,date:f.date,venue:f.venue,fee:+f.fee,deadline:f.deadline,max:+f.max,min:+f.min,courts:+f.courts||2,prize:vnd(+f.prizeAmt)+' tiền thưởng',rules:'Loại trực tiếp, 21 điểm, 3 set.',cost:{court:+f.court,staff:+f.staff,prize:+f.prizeAmt,misc:+f.misc,ref:+f.ref},status:'open',bracket:null};
+    D.tournaments.push(nt);logEv('Tạo giải "'+nt.name+'"');save();U.modal=null;render();toast('Đã tạo giải')}
+  else if(k==='result'){var tr=tour(form.dataset.t),r=+form.dataset.r,i=+form.dataset.i,m=tr.bracket.rounds[r][i],sa=+f.sa,sb=+f.sb;
+    if(f.sa===''||f.sb===''||sa===sb){toast('Nhập tỷ số hợp lệ, hai bên không hòa');return}
+    m.sa=sa;m.sb=sb;m.w=sa>sb?m.a:m.b;propagate(tr);
+    var last=tr.bracket.rounds[tr.bracket.rounds.length-1][0];if(last.w){tr.champion=last.w;tr.status='finished'}
+    logEv('Kết quả '+entryName(reg(m.a))+' '+sa+'-'+sb+' '+entryName(reg(m.b)));save();render();toast('Đã lưu kết quả')}
+});
+
+document.addEventListener('input',function(ev){var t=ev.target;
+  if(t.id==='fq'){U.f.q=t.value;document.getElementById('courseList').innerHTML=courseList()}
+  if(t.id==='priceIn')prevPrice()});
+document.addEventListener('change',function(ev){var t=ev.target;
+  var map={fl:'level',fa:'area',fs:'sched',fm:'max'};
+  if(map[t.id]){U.f[map[t.id]]=t.value;document.getElementById('courseList').innerHTML=courseList()}
+  if(t.id==='coachSel'){U.coachId=t.value;render()}
+  if(t.dataset&&t.dataset.set){D.settings[t.dataset.set]=+t.value||0;save();render()}
+  if(t.dataset&&t.dataset.assume!==undefined){D.assume[t.dataset.assume]=t.value;save()}});
+
+render();
+})();
+</script>
+
+</body></html>
