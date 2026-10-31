@@ -3,6 +3,7 @@ import {
   CircleDollarSign, DollarSign, GraduationCap, MapPin, Plus, Sparkles, Users,
 } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
+import { SportImage } from '../design-system/SportImage';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Badge, Button, Card, EmptyState, FormField, Rating, Select, TextInput, useToast } from '../design-system/components';
 import { createBrowserDemoRepository } from '../data/repository';
@@ -107,7 +108,7 @@ export function CoachDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {students.slice(0, 5).map(({ enrollment, course, student }) => (
+                {[...students].sort((a,b) => b.enrollment.createdAt.localeCompare(a.enrollment.createdAt)).slice(0, 5).map(({ enrollment, course, student }) => (
                   <tr key={enrollment.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -167,7 +168,7 @@ export function CoachCourseListPage() {
 
             return (
               <Card key={course.id} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <img
+                <SportImage
                   src={course.coverImageUrl || DEFAULT_COURSE_COVER_IMAGE}
                   alt={course.title}
                   style={{ width: '100%', height: '180px', objectFit: 'cover', objectPosition: 'center 20%', borderRadius: '8px' }}
@@ -505,7 +506,7 @@ export function CoachCreateCoursePage() {
             <div style={{ marginTop: '4px' }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '6px' }}>Xem trước ảnh đại diện:</div>
               <div style={{ width: '220px', height: '140px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--color-border)', background: '#e9f2ed' }}>
-                <img
+                <SportImage
                   src={coverImageUrl || DEFAULT_COURSE_COVER_IMAGE}
                   alt="Preview"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }}

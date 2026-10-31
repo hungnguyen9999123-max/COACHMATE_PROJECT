@@ -1,0 +1,223 @@
+/* Shared presentation rules, using the existing CoachMate token scale. */
+:root { --font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+body { font-size:var(--font-size-sm); line-height:var(--line-height-body); }
+img { max-width:100%; }
+.cm-sport-image { background:var(--color-primary-soft) url('/images/badminton-court.svg') center/cover no-repeat; }
+.app-shell :where(p, li) { overflow-wrap:break-word; }
+.app-shell :where(h1,h2,h3) { text-wrap:balance; }
+.app-page-inner, .app-workspace, .app-header-left, .app-header-title, .app-header-actions { min-width:0; }
+.app-page-inner > * { max-width:100%; }
+.app-shell .cm-button, .app-shell .cm-input, .app-shell .cm-select, .app-shell .cm-textarea, .app-shell .cm-label { font-size:var(--font-size-sm); }
+.app-shell .cm-button { min-height:44px; white-space:normal; text-align:center; }
+.app-shell .cm-badge { font-size:var(--font-size-xs); line-height:1.4; white-space:normal; }
+.app-shell .cm-input,.app-shell .cm-select { min-height:44px; }
+.app-shell .cm-field { gap:var(--space-2); }
+.app-shell .cm-card { border-radius:var(--radius-lg); }
+.app-shell .cm-empty { min-height:230px; gap:8px; }
+.app-shell .cm-empty p,.app-shell .cm-error-state p { font-size:var(--font-size-sm); max-width:420px; }
+.app-shell .cm-empty h3,.app-shell .cm-error-state h3 { font-size:var(--font-size-lg); }
+.app-shell .cm-rating { font-size:var(--font-size-xs); }
+.app-shell .cm-price { white-space:nowrap; }
+.app-shell .cm-price small { font-size:var(--font-size-xs); white-space:nowrap; }
+.app-demo-strip { display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 20px; border-bottom:1px solid var(--color-border); color:var(--color-primary-dark); background:var(--color-primary-soft); font-size:var(--font-size-xs); }
+.app-demo-strip svg { flex:0 0 auto; }
+.app-brand-name { display:block; font-size:16px; letter-spacing:.02em; }
+.app-brand-name small { display:block; max-width:170px; white-space:normal; font-size:var(--font-size-xs); line-height:1.4; letter-spacing:0; }
+.app-side-profile > .cm-avatar { display:grid; flex:0 0 38px; width:38px; height:38px; }
+.app-nav-link { font-size:var(--font-size-sm); min-height:44px; }
+.app-navigation { min-height:0; flex:1; align-content:start; }
+.app-sidebar-bottom { margin-top:16px; flex-shrink:0; }
+.app-help-link { display:flex; align-items:center; gap:8px; padding:10px 6px; border:0; color:var(--color-text-secondary); background:transparent; font-size:var(--font-size-xs); text-align:left; }
+.app-help-link:hover { color:var(--color-primary); }
+.app-side-profile > a { display:grid; gap:3px; min-width:0; color:var(--color-text); text-decoration:none; }
+.app-side-profile strong { font-size:var(--font-size-xs); white-space:normal; }
+.app-side-profile small { font-size:var(--font-size-xs); }
+.app-header { gap:16px; }
+.app-header-title h1 { font-size:var(--font-size-lg); }
+.app-breadcrumb { font-size:var(--font-size-xs); }
+.app-user-button strong,.app-user-button small { font-size:var(--font-size-xs); }
+.app-search-launch { display:flex; align-items:center; gap:9px; min-height:40px; width:230px; padding:0 12px; border:1px solid var(--color-border); border-radius:var(--radius-md); color:var(--color-text-secondary); background:var(--color-background); text-align:left; font-size:var(--font-size-sm); }
+.app-search-launch span { flex:1; }
+.app-search-launch kbd { padding:2px 5px; border:1px solid var(--color-border); border-radius:4px; background:var(--color-surface); font:inherit; font-size:var(--font-size-xs); }
+.app-popover { width:320px; max-width:calc(100vw - 32px); }
+.app-popover-heading,.app-popover-heading button,.app-notification-item strong,.app-role-option > span:nth-child(2) { font-size:var(--font-size-sm); }
+.app-popover-heading strong { display:flex; align-items:center; gap:6px; }
+.app-popover-heading button:disabled { opacity:.5; cursor:default; }
+.app-notification-item small { font-size:var(--font-size-xs); line-height:1.5; }
+.app-notification-item.is-read { background:var(--color-background); }
+.app-notification-item.is-read > i { background:var(--color-border); }
+.app-profile-open { text-decoration:none; font-size:var(--font-size-sm); }
+.app-role-option { min-height:48px; }
+.app-role-option-icon { color:var(--color-primary); }
+.app-search-results { max-height:55vh; overflow-y:auto; display:grid; gap:4px; margin-top:12px; }
+.app-search-results > a { display:flex; align-items:center; gap:10px; padding:12px; border-radius:var(--radius-md); color:var(--color-text); text-decoration:none; }
+.app-search-results > a:hover { background:var(--color-primary-soft); }
+.app-search-results > a > span { display:grid; flex:1; gap:4px; }
+.app-search-results strong { font-size:var(--font-size-sm); }
+.app-search-results small { color:var(--color-text-secondary); font-size:var(--font-size-xs); }
+.app-demo-help { display:grid; gap:12px; }
+.app-demo-help p { margin:0; font-size:var(--font-size-sm); }
+.cm-scrim--drawer { padding:0; place-items:stretch start; }
+.cm-scrim--drawer .cm-modal { width:min(340px,90vw); max-height:100dvh; border-radius:0 var(--radius-lg) var(--radius-lg) 0; }
+.cm-scrim--drawer .cm-modal-body { padding:16px; }
+.app-mobile-nav { min-height:calc(100dvh - 120px); display:flex; flex-direction:column; }
+.app-mobile-nav .app-nav-link > span { display:block; }
+.app-mobile-nav .app-nav-link { justify-content:flex-start; gap:12px; padding:0 11px; }
+.app-mobile-nav .app-collapse { display:none; }
+.app-mobile-nav .app-sidebar-bottom { margin-top:auto; }
+
+.market-hero { grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); }
+.market-hero-content { padding:32px; min-width:0; }
+.market-hero-content h2 { font-size:clamp(30px,3vw,40px); }
+.market-hero-content > p,.market-section-heading p,.market-bottom-banner p,.tour-hero p,.tour-section-heading p { font-size:var(--font-size-sm); line-height:1.65; }
+.market-hero-art { min-height:330px; }
+.market-hero-float { max-width:calc(100% - 32px); }
+.market-hero-search { max-width:none; }
+.market-hero-search input { font-size:var(--font-size-sm); }
+.market-hero-search .cm-button { font-size:var(--font-size-sm); }
+.market-filter-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.market-filter-grid .cm-label,.market-filter-grid .cm-select { font-size:var(--font-size-sm); }
+.market-format-chip { font-size:var(--font-size-xs); min-height:34px; }
+.market-clear,.market-favorites-filter,.market-details-link { font-size:var(--font-size-sm); }
+.market-course-grid { gap:20px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.market-card-image-wrap { height:auto; aspect-ratio:16/9; }
+.market-card-body { padding:18px; gap:12px; }
+.market-card-title { font-size:18px; min-height:54px; line-height:1.5; }
+.market-card-coach { flex-wrap:wrap; gap:7px; font-size:var(--font-size-xs); }
+.market-card-coach .cm-rating { margin-left:auto; font-size:var(--font-size-xs); }
+.market-card-tags > span:last-child,.market-card-meta > span,.market-status,.market-seats { font-size:var(--font-size-xs); }
+.market-card-footer { flex-wrap:wrap; row-gap:10px; }
+.market-card-footer .cm-price { font-size:20px; }
+.market-favorite { width:40px; height:40px; }
+.active-filters { display:flex; flex-wrap:wrap; gap:8px; }
+.active-filters:empty { display:none; }
+.active-filters button { display:flex; gap:6px; max-width:100%; padding:7px 12px; border:1px solid var(--color-border); border-radius:var(--radius-pill); color:var(--color-primary-dark); background:var(--color-primary-soft); font-size:var(--font-size-xs); overflow-wrap:anywhere; }
+.course-detail-layout { grid-template-columns:minmax(0,1fr) 320px; gap:24px; }
+.course-detail-cover { height:auto; aspect-ratio:16/9; }
+.course-detail-title-row h2 { font-size:30px; line-height:1.3; }
+.course-detail-coach strong { font-size:var(--font-size-md); }
+.course-detail-coach p,.course-detail-section > p { font-size:var(--font-size-sm); }
+.course-curriculum strong,.course-info-grid strong,.course-related a { font-size:var(--font-size-sm); }
+.course-info-grid small,.course-detail-label,.course-checkout-note,.course-enroll-meta,.course-price-per-session,.course-save-text { font-size:var(--font-size-xs); }
+.course-enroll-capacity { grid-template-columns:1fr; }
+.course-enroll-capacity strong { font-size:var(--font-size-sm); }
+.course-enroll-capacity > span { font-size:var(--font-size-xs); }
+.mobile-enroll-bar { display:none; }
+.tour-hero { min-height:320px; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+.tour-hero-copy { width:auto; min-width:0; padding:32px; }
+.tour-hero h2 { font-size:clamp(30px,3vw,40px); overflow-wrap:normal; }
+.tour-hero-visual { min-width:0; min-height:300px; }
+.tour-hero-caption { position:absolute; left:16px; right:16px; bottom:16px; width:auto; max-width:calc(100% - 32px); }
+.tour-filters { grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.tour-filters .cm-label,.tour-filters .cm-input,.tour-filters .cm-select { font-size:var(--font-size-sm); }
+.tour-market-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.tour-market-image { height:auto; aspect-ratio:16/9; }
+.tour-market-title { font-size:18px; line-height:1.5; }
+.tour-market-fact,.tour-market-prize,.tour-market-capacity,.tour-market-body footer a { font-size:var(--font-size-xs); }
+.tour-market-body { padding:18px; gap:12px; }
+.tour-market-body footer { flex-wrap:wrap; gap:10px; }
+.tour-market-body footer .cm-price { font-size:20px; }
+.tournament-description,.tour-detail-section p,.journey-heading > p { font-size:var(--font-size-sm); }
+.journey-form-grid .cm-label,.journey-form-grid .cm-input,.journey-form-grid .cm-select { font-size:var(--font-size-sm); }
+.journey-summary h3,.my-activity-main h3 { font-size:18px; }
+.journey-demo-disclosure strong { font-size:var(--font-size-sm); }
+.journey-demo-disclosure small,.journey-summary > div:not(.journey-total),.journey-summary-coach,.journey-fine-print,.my-activity-main > span,.my-activity-main p { font-size:var(--font-size-xs); }
+.journey-checkout-layout { grid-template-columns:minmax(0,1fr) 340px; }
+.journey-checkout-layout > * { min-width:0; }
+.journey-review { display:grid; gap:16px; }
+.journey-review dl,.confirmation-facts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:0; }
+.journey-review dt,.confirmation-facts dt { color:var(--color-text-secondary); font-size:var(--font-size-xs); }
+.journey-review dd,.confirmation-facts dd { margin:4px 0 0; overflow-wrap:anywhere; font-size:var(--font-size-sm); font-weight:600; }
+.journey-review-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.confirmation-card { max-width:720px; margin:20px auto; display:grid; gap:22px; padding:32px; }
+.confirmation-icon { width:64px; height:64px; display:grid; place-items:center; border-radius:50%; color:var(--color-primary); background:var(--color-primary-soft); }
+.confirmation-card h2 { margin:0; font-size:28px; }.confirmation-card h3 { margin:0; font-size:20px; }
+.confirmation-card > p { margin:0; color:var(--color-text-secondary); }
+.confirmation-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.payment-table { font-size:var(--font-size-sm); }
+.payment-table th { font-size:var(--font-size-xs); }
+.payment-table td:first-child strong { font-size:var(--font-size-sm); }
+.payment-table td:first-child small { font-size:var(--font-size-xs); }
+.coach-page,.organizer-page,.sys-admin-page { gap:24px; }
+.app-shell :where(table) { width:100%; font-size:var(--font-size-sm); }
+.app-shell :where(th) { font-size:var(--font-size-xs); line-height:1.5; }
+.app-shell :where(td) { font-size:var(--font-size-sm); line-height:1.5; }
+.app-shell :where(td,th) { padding:14px 12px; }
+.app-shell :where(table) .cm-select { min-width:140px; }
+.app-shell :where(.sys-admin-table-wrap,.table-container,.coach-table-container,.payment-table-wrap,.bracket-container) { max-width:100%; overflow:auto; }
+.attention-panel { display:grid; gap:12px; padding:20px; margin-bottom:24px; border:1px solid var(--color-border); border-radius:var(--radius-lg); background:var(--color-surface); }
+.attention-panel h2 { display:flex; align-items:center; gap:8px; margin:0; font-size:18px; }.attention-panel > div { display:flex; flex-wrap:wrap; gap:10px; }
+.organizer-page > .cm-card:has(table) { overflow-x:auto; }
+@media (max-width:760px) { .organizer-page form > div[style*="grid-template-columns"] { grid-template-columns:minmax(0,1fr)!important; } }
+.attention-panel a { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:var(--radius-md); color:var(--color-primary-dark); background:var(--color-primary-soft); text-decoration:none; font-size:var(--font-size-sm); }
+.attention-panel a strong { padding:0 5px; font-variant-numeric:tabular-nums; }
+
+@media (max-width:1199px) {
+  .app-search-launch { width:190px; }.app-user-button > span:nth-child(2) { display:none; }
+  .app-shell:not(.sidebar-collapsed) { --sidebar-width:258px; }
+  .sidebar-collapsed { --sidebar-width:78px; }
+  .market-hero,.tour-hero { grid-template-columns:1fr; }
+  .market-hero-content,.tour-hero-copy { padding:28px; }
+  .market-hero-art,.tour-hero-visual { min-height:240px; height:240px; }
+  .tour-hero > .tour-hero-visual { min-height:240px; }
+  .market-hero-art::after { background:linear-gradient(0deg,rgba(17,107,77,.25),transparent); }
+  .market-hero h2,.tour-hero h2 { max-width:650px; font-size:32px; }
+  .market-course-grid,.tour-market-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .course-detail-layout,.tournament-detail-grid { grid-template-columns:minmax(0,1fr) 290px; }
+  .journey-checkout-layout { grid-template-columns:minmax(0,1fr) 290px; }
+  .journey-form-grid { grid-template-columns:1fr; }
+  .sys-admin-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:950px) {
+  .course-detail-layout,.tournament-detail-grid,.journey-checkout-layout { grid-template-columns:1fr; }
+  .course-enroll-panel,.tour-register-panel,.journey-summary { position:static; order:initial; }
+  .journey-form-grid { grid-template-columns:1fr 1fr; }
+  .market-filter-grid,.tour-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .app-header { padding-inline:20px; }
+  .app-header-title h1 { font-size:16px; }
+  .app-breadcrumb { display:none; }
+  .my-course-row { flex-wrap:wrap; }.my-activity-side { margin-left:auto; }
+}
+@media (max-width:760px) {
+  .app-shell,.app-shell:not(.sidebar-collapsed),.sidebar-collapsed { --sidebar-width:0px; }
+  .app-header { padding:10px 12px; gap:8px; min-height:64px; }
+  .app-header-title h1 { font-size:14px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:165px; }
+  .app-header-actions,.app-header-left { gap:7px; }
+  .app-search-launch { width:34px; height:38px; padding:0; border:0; justify-content:center; background:transparent; }
+  .app-search-launch span,.app-search-launch kbd { display:none; }
+  .app-demo-strip { justify-content:flex-start; padding:8px 15px; font-size:12px; }
+  .app-popover { position:fixed; top:68px; right:12px; max-height:calc(100dvh - 90px); overflow:auto; }
+  .app-page { padding:24px 16px; }
+  .market-course-grid,.tour-market-grid { grid-template-columns:1fr; }
+  .market-card-title { min-height:0; }
+  .market-hero-content,.tour-hero-copy { padding:24px; }
+  .market-hero-content h2,.tour-hero h2 { font-size:30px; }
+  .market-hero-float { right:12px; bottom:40px; }
+  .market-hero-float strong { font-size:12px; }
+  .market-hero-search { flex-wrap:wrap; padding:10px; gap:10px; }.market-hero-search input { width:calc(100% - 36px); }.market-hero-search .cm-button { width:100%; }
+  .market-section-heading { align-items:flex-start; flex-direction:column; }
+  .market-section-heading h2,.tour-section-heading h2 { font-size:24px; }
+  .market-results-heading > span { display:none; }
+  .tour-section-heading { flex-wrap:wrap; }
+  .market-filter-grid,.tour-filters { grid-template-columns:1fr; }
+  .tour-filters > .cm-field:first-child { grid-column:auto; }
+  .tour-section-stat { display:none; }
+  .tour-hero-meta { flex-wrap:wrap; }
+  .tour-hero-caption { max-width:calc(100% - 24px); left:12px; right:12px; bottom:12px; }
+  .course-detail-title-row h2 { font-size:26px; }.course-detail-coach { align-items:flex-start; }.course-detail-coach .cm-rating { margin-left:0; }
+  .course-detail-coach { display:grid; grid-template-columns:48px minmax(0,1fr); }
+  .course-detail-coach > .cm-avatar { width:48px; height:48px; font-size:14px; }
+  .course-detail-coach > .cm-rating { grid-column:2; }
+  .course-detail { padding-bottom:90px; }
+  .mobile-enroll-bar { position:fixed; z-index:25; inset:auto 0 0; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--color-border); background:var(--color-surface); box-shadow:var(--shadow-md); }
+  .mobile-enroll-bar .cm-price { font-size:22px; }.mobile-enroll-bar .cm-button { min-height:44px; }
+  .journey-form-grid { grid-template-columns:1fr; }
+  .journey-checkout-layout .journey-summary { order:initial; }
+  .journey-review dl,.confirmation-facts { grid-template-columns:1fr; }
+  .confirmation-card { padding:22px; }.confirmation-card h2 { font-size:24px; }
+  .confirmation-actions { display:grid; }.confirmation-actions > * { width:100%; }
+  .sys-admin-header { flex-wrap:wrap; }.sys-admin-metrics,.sys-admin-shortcuts { grid-template-columns:1fr; }
+  .my-course-row { display:grid; grid-template-columns:1fr; }.my-activity-main { min-width:0; }.my-course-row > img { width:100%; height:auto; aspect-ratio:16/9; }
+  .my-activity-side { margin:0; display:flex; flex-wrap:wrap; width:100%; }
+  .cm-toast { bottom:90px; right:12px; font-size:14px; }
+}

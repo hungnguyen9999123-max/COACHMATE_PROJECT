@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Badge, Button, Card, EmptyState, FormField, Select, TextInput, useToast } from '../design-system/components';
+import { Badge, Button, Card, ConfirmDialog, EmptyState, FormField, Select, TextInput, useToast } from '../design-system/components';
 import { createBrowserDemoRepository } from '../data/repository';
 import {
   addCourtByOrganizer, addRefereeByOrganizer, approveTournamentRegistrationByOrganizer, createTournamentByOrganizer,
@@ -54,7 +54,7 @@ export function OrganizerDashboardPage() {
     </section>
     <Card className="sys-admin-recent">
       <div className="sys-admin-section-heading"><div><h3>Giải đấu hiện có</h3><p>Cập nhật mới nhất về trạng thái đăng ký.</p></div><Link to="/organizer/tournaments">Xem danh sách <ArrowRight size={15}/></Link></div>
-      <ul>{data.tournaments.slice(0, 5).map((tournament) => <li key={tournament.id}><span><strong>{tournament.name}</strong><small>{tournament.venue}</small></span><Badge tone={tournament.status === 'open' ? 'success' : tournament.status === 'finished' ? 'neutral' : 'info'}>{tournament.status}</Badge></li>)}</ul>
+      <ul>{data.tournaments.slice(0, 5).map((tournament) => <li key={tournament.id}><span><strong>{tournament.name}</strong><small>{tournament.venue}</small></span><Badge tone={tournament.status === 'open' ? 'success' : tournament.status === 'finished' ? 'neutral' : 'info'}>{tournament.status === 'open' ? 'Đang mở đăng ký' : tournament.status === 'closed' ? 'Đã chốt đăng ký' : 'Đã kết thúc'}</Badge></li>)}</ul>
     </Card>
   </div>;
 }
@@ -321,6 +321,7 @@ export function OrganizerTournamentDetailPage() {
   const [scoreMatchId, setScoreMatchId] = useState<string | null>(null);
   const [scoreA, setScoreA] = useState(21);
   const [scoreB, setScoreB] = useState(19);
+  const [confirmBracket, setConfirmBracket] = useState(false);
 
   if (!tournament) {
     return <EmptyState title="Không tìm thấy giải đấu" description="Giải đấu này không tồn tại hoặc đã bị xóa." action={<Button onClick={() => navigate('/organizer/tournaments')}>Quay lại danh sách</Button>} />;
@@ -390,8 +391,8 @@ export function OrganizerTournamentDetailPage() {
         </div>
 
         {tournament.status === 'open' ? (
-          <Button onClick={handleGenerateBracket} disabled={approvedRegs < 2 || pendingRegs.length > 0}>
-            <Trophy size={16}/> Chốt đăng ký & Sinh sơ đồ nhánh đấu (Bracket $2^k$)
+          <Button onClick={() => setConfirmBracket(true)} disabled={approvedRegs < 2 || pendingRegs.length > 0}>
+            <Trophy size={16}/> Chốt đăng ký và tạo nhánh đấu
           </Button>
         ) : (
           <Badge tone={tournament.status === 'closed' ? 'info' : 'success'}>
@@ -400,11 +401,12 @@ export function OrganizerTournamentDetailPage() {
         )}
       </header>
 
+      <ConfirmDialog open={confirmBracket} title="Chốt đăng ký giải đấu?" description={`Bản demo sẽ đóng đăng ký và tạo nhánh đấu cho ${approvedRegs} lượt đã duyệt. Hãy kiểm tra danh sách trước khi tiếp tục.`} onCancel={() => setConfirmBracket(false)} onConfirm={() => { setConfirmBracket(false); handleGenerateBracket(); }}/>
       {/* Bracket Visualization */}
       {tournament.bracket && tournament.bracket.roundMatchIds.length > 0 ? (
         <Card style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Trophy size={18} color="var(--color-primary)"/> Sơ đồ Nhánh đấu (Interactive Tournament Bracket)
+            <Trophy size={18} color="var(--color-primary)"/> Sơ đồ nhánh đấu
           </h3>
 
           <div className="bracket-container">

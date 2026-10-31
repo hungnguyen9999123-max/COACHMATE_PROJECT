@@ -208,7 +208,7 @@ export function AdminTransactionsPage() {
 
   return <div className="sys-admin-page">
     <PageHeader badge="QUẢN LÝ GIAO DỊCH" title="Giao dịch" description="Tra cứu lịch sử thanh toán và trạng thái các khoản phí trên nền tảng."/>
-    <div className="sys-admin-notice" role="note"><CreditCard size={18}/><span>Trạng thái theo dõi các khoản phí gắn với yêu cầu đăng ký; không thay thế xác nhận từ ngân hàng hoặc đơn vị thanh toán.</span></div>
+    <div className="sys-admin-notice" role="note"><CreditCard size={18}/><span>Giao dịch DEMO / MÔ PHỎNG. Không thu hoặc hoàn tiền thật; dữ liệu chỉ được ghi nhận trên trình duyệt.</span></div>
     <div className="sys-admin-toolbar"><TextInput type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm người thanh toán hoặc mã tham chiếu" aria-label="Tìm giao dịch"/>
       <Select aria-label="Lọc loại giao dịch" value={kind} onChange={(event) => setKind(event.target.value)}><option value="">Tất cả loại</option>{Object.entries(PAYMENT_KINDS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select>
       <Badge tone="neutral">{payments.length} giao dịch</Badge>
@@ -218,7 +218,7 @@ export function AdminTransactionsPage() {
       <tbody>{payments.map((payment) => <tr key={payment.id}>
         <td>{new Date(payment.createdAt).toLocaleString('vi-VN')}</td><td><strong>{payment.payerName}</strong></td><td>{PAYMENT_KINDS[payment.kind]}</td>
         <td><code>{payment.referenceId}</code></td><td>{formatCurrency(payment.amount)}</td><td>{formatCurrency(payment.paymentFee)}</td>
-        <td><Badge tone={payment.status === 'completed' ? 'success' : 'warning'}>{payment.status === 'completed' ? 'Đã ghi nhận' : 'Cập nhật lệ phí'}</Badge></td>
+        <td><Badge tone={payment.status === 'completed' ? 'success' : 'warning'}>{payment.status === 'completed' ? 'Hoàn tất mô phỏng' : 'Đã hoàn mô phỏng'}</Badge></td>
       </tr>)}</tbody>
     </table></div>{!payments.length && <p className="sys-admin-empty">Không tìm thấy giao dịch phù hợp.</p>}</Card>
   </div>;
