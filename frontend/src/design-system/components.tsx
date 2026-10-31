@@ -23,6 +23,7 @@ import {
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
   type ReactNode,
+  type Ref,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react';
@@ -39,7 +40,7 @@ export function Button({ variant = 'primary', size = 'md', icon, children, class
   return <button className={`cm-button cm-button--${variant} cm-button--${size} ${className}`} {...props}>{icon}{children}</button>;
 }
 
-export function IconButton({ label, children, className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+export function IconButton({ label, children, className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; ref?: Ref<HTMLButtonElement> }) {
   return <button className={`cm-icon-button ${className}`} aria-label={label} title={label} {...props}>{children}</button>;
 }
 
@@ -85,20 +86,36 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 }
 export function useToast() { return useContext(ToastContext); }
 
-export function Modal({ title, open, onClose, children, footer }: { title: string; open: boolean; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
-  const closeRef = useRef<HTMLButtonElement>(null);
+export function Modal({ title, open, onClose, children, footer, variant = 'modal' }: { title: string; open: boolean; onClose: () => void; children: ReactNode; footer?: ReactNode; variant?: 'modal' | 'drawer' }) {
+  const panelRef = useRef<HTMLElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const titleId = useId();
   useEffect(() => {
     if (!open) return;
-    closeRef.current?.focus();
-    const handle = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusable = () => Array.from(panelRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), select, textarea, [tabindex="0"]') ?? []).filter((element) => element.getClientRects().length > 0);
+    (panelRef.current?.querySelector<HTMLElement>('input[type="search"]') ?? focusable()[0] ?? panelRef.current)?.focus();
+    const handle = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCloseRef.current();
+      if (event.key === 'Tab') {
+        const elements = focusable();
+        const first = elements[0]; const last = elements.at(-1);
+        if (!first) { event.preventDefault(); panelRef.current?.focus(); }
+        else if (event.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    };
     window.addEventListener('keydown', handle);
-    return () => window.removeEventListener('keydown', handle);
-  }, [open, onClose]);
+    return () => { window.removeEventListener('keydown', handle); document.body.style.overflow = previousOverflow; previousFocus?.focus(); };
+  }, [open]);
   if (!open) return null;
-  return <div className="cm-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className="cm-modal" role="dialog" aria-modal="true" aria-labelledby="cm-modal-title"><header><h2 id="cm-modal-title">{title}</h2><IconButton label="Đóng hộp thoại" onClick={onClose}><X size={18}/></IconButton></header><div className="cm-modal-body">{children}</div>{footer && <footer>{footer}</footer>}</section></div>;
+  return <div className={`cm-scrim ${variant === 'drawer' ? 'cm-scrim--drawer' : ''}`} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={panelRef} tabIndex={-1} className="cm-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}><header><h2 id={titleId}>{title}</h2><IconButton label="Đóng hộp thoại" onClick={onClose}><X size={18}/></IconButton></header><div className="cm-modal-body">{children}</div>{footer && <footer>{footer}</footer>}</section></div>;
 }
 export function ConfirmDialog({ open, title, description, onCancel, onConfirm }: { open: boolean; title: string; description: string; onCancel: () => void; onConfirm: () => void }) { return <Modal open={open} title={title} onClose={onCancel}><p>{description}</p><div className="cm-modal-actions"><Button variant="outline" onClick={onCancel}>Hủy</Button><Button variant="danger" onClick={onConfirm}>Xác nhận</Button></div></Modal>; }
-export function Drawer({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: ReactNode }) { return <div className={`cm-drawer-scrim ${open ? 'is-open' : ''}`} aria-hidden={!open} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><aside className="cm-drawer"><header><h2>{title}</h2><IconButton label="Đóng ngăn" onClick={onClose}><X size={18}/></IconButton></header>{children}</aside></div>; }
+export function Drawer({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: ReactNode }) { return <Modal open={open} title={title} onClose={onClose} variant="drawer">{children}</Modal>; }
 export function Skeleton({ width = '100%', height = 16, circle = false }: { width?: string | number; height?: number; circle?: boolean }) { return <span className={`cm-skeleton ${circle ? 'is-circle' : ''}`} style={{ width, height }}/>; }
 export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) { return <div className="cm-empty"><span><Search size={21}/></span><h3>{title}</h3><p>{description}</p>{action}</div>; }
 export function ErrorState({ title = 'Đã có lỗi xảy ra', description = 'Vui lòng thử lại.' }: { title?: string; description?: string }) { return <div className="cm-error-state"><AlertCircle/><h3>{title}</h3><p>{description}</p></div>; }

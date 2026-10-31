@@ -12,8 +12,6 @@ import {
   submitMatchScoreByOrganizer,
   updateCourtByOrganizer,
   updateRefereeByOrganizer,
-  updateAssumptionStatusByOrganizer,
-  updateBusinessSettingsByOrganizer,
 } from './organizerFlows';
 
 describe('Organizer Flows Domain Logic', () => {

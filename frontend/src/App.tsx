@@ -6,6 +6,7 @@ import { NotFoundPage } from './layout/PlaceholderPage';
 import { AccountProfilePage } from './layout/AccountProfilePage';
 import { ToastProvider } from './design-system/components';
 import { CourseDetailPage, CourseMarketplace } from './student/CourseMarketplace';
+import { RegistrationConfirmation } from './student/RegistrationConfirmation';
 import {
   CourseCheckout, MyCoursesPage, MyTournamentsPage,
   PaymentHistoryPage, StudentProfilePage, TournamentDetailPage,
@@ -52,6 +53,7 @@ export function App() {
             <Route path="/me/tournaments" element={<MyTournamentsPage />} />
             <Route path="/me/payments" element={<PaymentHistoryPage />} />
             <Route path="/me/profile" element={<StudentProfilePage />} />
+            <Route path="/me/confirmation/:kind/:recordId" element={<RegistrationConfirmation />} />
 
             {/* Coach Routes */}
             <Route path="/coach" element={<Navigate to="/coach/dashboard" replace />} />
