@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+ <defs><linearGradient id="a" x2="1" y2="1"><stop stop-color="#116B4D"/><stop offset="1" stop-color="#168A63"/></linearGradient></defs>
+ <path fill="url(#a)" d="M0 0h1200v675H0z"/>
+ <g transform="translate(220 60) rotate(12 380 280)" fill="none" stroke="#E4F5EC" stroke-width="5" opacity=".5"><path d="M0 0h760v550H0zM0 275h760M380 0v550M0 80h760M0 470h760M80 0v550M680 0v550"/></g>
+ <g transform="translate(820 270) rotate(30)" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"><path d="M-70-160L-35 30Q0 70 35 30L70-160M-35-165L-18 40M0-165V47M35-165L18 40M-70-160Q0-190 70-160M-46-60Q0-45 46-60M-35 30Q0 5 35 30"/><path d="M-25 50Q0 94 25 50" fill="#C6F135" stroke="#C6F135"/></g>
+ <text x="60" y="600" fill="#FFFFFF" font-family="system-ui,sans-serif" font-size="26" font-weight="700" letter-spacing="5">COACHMATE</text>
+</svg>
