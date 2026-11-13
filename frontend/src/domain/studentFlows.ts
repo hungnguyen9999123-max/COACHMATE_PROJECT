@@ -1,8 +1,8 @@
-import type { DemoState, Payment, Student, TournamentRegistration } from './types';
+import type { DemoState, Payment, SkillLevel, Student, TournamentRegistration } from './types';
 
 export type PaymentMethod = Payment['method'];
 export interface CheckoutInput { name: string; phone: string; email?: string; method: PaymentMethod; }
-export interface RegistrationInput extends CheckoutInput { partnerName?: string; }
+export interface RegistrationInput extends CheckoutInput { partnerName?: string; skillLevel?: SkillLevel; club?: string; }
 export interface FlowResult { state: DemoState; recordId: string; }
 
 export function validateCheckout(input: CheckoutInput): string | null {
@@ -110,6 +110,8 @@ export function createTournamentRegistration(
     partnerName: tournament.format === 'doubles' ? input.partnerName!.trim() : '',
     isCurrentStudent: true, fee: tournament.fee, paymentFee, createdAt: now, paymentId,
     reviewStatus: 'pending',
+    skillLevel: input.skillLevel ?? student.level,
+    club: input.club?.trim() || undefined,
   };
   state.tournamentRegistrations.push(registration);
   state.payments.push(paymentRecord({

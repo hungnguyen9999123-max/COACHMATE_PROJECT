@@ -1,4 +1,5 @@
 import { prependActivity } from './activity';
+import { generateAiScheduleBracket } from './aiScheduler';
 import { DEFAULT_COURSE_COVER_IMAGE } from './constants';
 import { generateTournamentBracket, recordMatchResult } from './tournaments';
 import type { Court, DemoState, Referee, Tournament } from './types';
@@ -64,9 +65,12 @@ export function createTournamentByOrganizer(
   return { state: updatedState, tournament };
 }
 
+export type BracketMode = 'ai' | 'classic';
+
 export function generateBracketByOrganizer(
   state: DemoState,
   tournamentId: string,
+  mode: BracketMode = 'ai',
 ): { state: DemoState; bracket: Tournament['bracket']; matches: DemoState['matches'] } {
   const tournament = state.tournaments.find((t) => t.id === tournamentId);
   if (!tournament) throw new Error('Không tìm thấy giải đấu.');
@@ -76,12 +80,9 @@ export function generateBracketByOrganizer(
     throw new Error('Vui lòng duyệt tất cả đăng ký đang chờ trước khi chốt giải.');
   }
 
-  const generated = generateTournamentBracket(
-    tournament,
-    registrations,
-    state.courts,
-    state.referees,
-  );
+  const generated = mode === 'ai'
+    ? generateAiScheduleBracket(tournament, registrations, state.courts, state.referees)
+    : generateTournamentBracket(tournament, registrations, state.courts, state.referees);
 
   const updatedTournaments = state.tournaments.map((t) =>
     t.id === tournamentId ? { ...t, status: 'closed' as const, bracket: generated.bracket } : t,
@@ -98,7 +99,9 @@ export function generateBracketByOrganizer(
       id: `activity-${Date.now()}`,
       occurredAt: new Date().toISOString(),
       actorName: 'Ban tổ chức',
-      action: `đã chốt đăng ký và sinh sơ đồ nhánh đấu cho ${tournament.name}`,
+      action: mode === 'ai'
+        ? `đã chốt đăng ký và để AI xếp cặp theo trình độ, chia sân/giờ cho ${tournament.name}`
+        : `đã chốt đăng ký và sinh sơ đồ nhánh đấu cho ${tournament.name}`,
     }),
   };
 

@@ -5,12 +5,15 @@ import {
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Badge, Button, Card, ConfirmDialog, EmptyState, FormField, Select, TextInput, useToast } from '../design-system/components';
+import { AiBadge, AiExplain } from '../design-system/AiExplain';
 import { createBrowserDemoRepository } from '../data/repository';
 import {
   addCourtByOrganizer, addRefereeByOrganizer, approveTournamentRegistrationByOrganizer, createTournamentByOrganizer,
   deleteCourtByOrganizer, deleteRefereeByOrganizer, generateBracketByOrganizer, rejectTournamentRegistrationByOrganizer,
-  submitMatchScoreByOrganizer, updateCourtByOrganizer, updateRefereeByOrganizer,
+  submitMatchScoreByOrganizer, updateCourtByOrganizer, updateRefereeByOrganizer, type BracketMode,
 } from '../domain/organizerFlows';
+import { describeAiPlan } from '../domain/aiScheduler';
+import { predictMatch } from '../domain/elo';
 import { calculateTournamentEconomics } from '../domain/finance';
 import { getRoundName, getTournamentStandings, isRegistrationApproved } from '../domain/tournaments';
 import type { DemoState, Tournament } from '../domain/types';
@@ -322,17 +325,27 @@ export function OrganizerTournamentDetailPage() {
   const [scoreA, setScoreA] = useState(21);
   const [scoreB, setScoreB] = useState(19);
   const [confirmBracket, setConfirmBracket] = useState(false);
+  const [bracketMode, setBracketMode] = useState<BracketMode>('ai');
 
   if (!tournament) {
     return <EmptyState title="Không tìm thấy giải đấu" description="Giải đấu này không tồn tại hoặc đã bị xóa." action={<Button onClick={() => navigate('/organizer/tournaments')}>Quay lại danh sách</Button>} />;
   }
 
+  const aiPlan = tournament.bracket?.mode === 'ai'
+    ? describeAiPlan(tournament, data.tournamentRegistrations, tournament.bracket, data.matches, data.courts)
+    : null;
+
   const handleGenerateBracket = () => {
     try {
-      const updated = generateBracketByOrganizer(data, tournament.id);
+      const updated = generateBracketByOrganizer(data, tournament.id, bracketMode);
       saveState(updated.state);
       setData(updated.state);
-      toast('Đã chốt đăng ký và sinh sơ đồ nhánh đấu thành công!', 'success');
+      toast(
+        bracketMode === 'ai'
+          ? 'AI đã xếp cặp theo trình độ và chia sân, giờ, trọng tài!'
+          : 'Đã chốt đăng ký và sinh sơ đồ nhánh đấu thành công!',
+        'success',
+      );
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Không thể tạo nhánh đấu.', 'error');
     }
@@ -364,12 +377,29 @@ export function OrganizerTournamentDetailPage() {
     e.preventDefault();
     if (!scoreMatchId) return;
 
+    const match = data.matches.find((candidate) => candidate.id === scoreMatchId);
+    const prediction = match ? predictMatch(match, data.tournamentRegistrations, data.matches) : null;
+    const winnerRegistrationId = match
+      ? scoreA > scoreB
+        ? match.participantARegistrationId
+        : scoreB > scoreA
+          ? match.participantBRegistrationId
+          : null
+      : null;
+    const upset = Boolean(prediction && winnerRegistrationId && winnerRegistrationId !== prediction.favoriteRegistrationId);
+    const favoriteName = prediction ? regMap.get(prediction.favoriteRegistrationId)?.participantName : null;
+
     try {
       const updated = submitMatchScoreByOrganizer(data, tournament.id, scoreMatchId, scoreA, scoreB);
       saveState(updated);
       setData(updated);
       setScoreMatchId(null);
-      toast('Đã cập nhật kết quả trận đấu!', 'success');
+      toast(
+        upset && prediction && favoriteName
+          ? `AI dự đoán ${favoriteName} thắng ${Math.max(prediction.winA, prediction.winB)}% — kết quả này là một cú lật kèo!`
+          : 'Đã cập nhật kết quả trận đấu!',
+        upset ? 'info' : 'success',
+      );
     } catch (err) {
       toast(err instanceof Error ? err.message : 'Không thể lưu kết quả.', 'error');
     }
@@ -378,6 +408,9 @@ export function OrganizerTournamentDetailPage() {
   const activeScoreMatch = matches.find((m) => m.id === scoreMatchId);
   const activeRegA = activeScoreMatch?.participantARegistrationId ? regMap.get(activeScoreMatch.participantARegistrationId) : null;
   const activeRegB = activeScoreMatch?.participantBRegistrationId ? regMap.get(activeScoreMatch.participantBRegistrationId) : null;
+  const activePrediction = activeScoreMatch && activeRegA && activeRegB
+    ? predictMatch(activeScoreMatch, data.tournamentRegistrations, data.matches)
+    : null;
 
   return (
     <div className="organizer-page">
@@ -391,9 +424,15 @@ export function OrganizerTournamentDetailPage() {
         </div>
 
         {tournament.status === 'open' ? (
-          <Button onClick={() => setConfirmBracket(true)} disabled={approvedRegs < 2 || pendingRegs.length > 0}>
-            <Trophy size={16}/> Chốt đăng ký và tạo nhánh đấu
-          </Button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '280px' }}>
+            <Select value={bracketMode} onChange={(event) => setBracketMode(event.target.value as BracketMode)} aria-label="Cách xếp cặp">
+              <option value="ai">AI tự xếp cặp &amp; lịch</option>
+              <option value="classic">Theo thứ tự đăng ký (cũ)</option>
+            </Select>
+            <Button onClick={() => setConfirmBracket(true)} disabled={approvedRegs < 2 || pendingRegs.length > 0}>
+              <Trophy size={16}/> Chốt đăng ký và tạo nhánh đấu
+            </Button>
+          </div>
         ) : (
           <Badge tone={tournament.status === 'closed' ? 'info' : 'success'}>
             {tournament.status === 'closed' ? 'Đã chốt đăng ký & Đang thi đấu' : 'Giải đấu đã kết thúc'}
@@ -401,13 +440,23 @@ export function OrganizerTournamentDetailPage() {
         )}
       </header>
 
-      <ConfirmDialog open={confirmBracket} title="Chốt đăng ký giải đấu?" description={`Bản demo sẽ đóng đăng ký và tạo nhánh đấu cho ${approvedRegs} lượt đã duyệt. Hãy kiểm tra danh sách trước khi tiếp tục.`} onCancel={() => setConfirmBracket(false)} onConfirm={() => { setConfirmBracket(false); handleGenerateBracket(); }}/>
+      <ConfirmDialog open={confirmBracket} title="Chốt đăng ký giải đấu?" description={bracketMode === 'ai' ? `AI sẽ xếp ${approvedRegs} lượt đã duyệt theo trình độ, tránh cho cùng CLB gặp nhau ở vòng 1 khi còn cách xếp khác, rồi chia sân, khung giờ và trọng tài. Hãy kiểm tra danh sách trước khi tiếp tục.` : `Bản demo sẽ đóng đăng ký và tạo nhánh đấu cho ${approvedRegs} lượt đã duyệt theo thứ tự đăng ký. Hãy kiểm tra danh sách trước khi tiếp tục.`} onCancel={() => setConfirmBracket(false)} onConfirm={() => { setConfirmBracket(false); handleGenerateBracket(); }}/>
       {/* Bracket Visualization */}
       {tournament.bracket && tournament.bracket.roundMatchIds.length > 0 ? (
         <Card style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Trophy size={18} color="var(--color-primary)"/> Sơ đồ nhánh đấu
+            {tournament.bracket.mode === 'ai' && <Badge tone="lime">AI</Badge>}
           </h3>
+
+          {aiPlan && (
+            <p style={{ margin: '0 0 16px', color: 'var(--color-text-secondary)', fontSize: '13px' }}>
+              AI xếp hạt giống theo trình độ · {aiPlan.byeCount} suất đặc cách · {aiPlan.courtCount} sân · khung giờ {aiPlan.firstMatchTime ?? '—'}–{aiPlan.lastMatchTime ?? '—'}
+              {aiPlan.clubConflicts.length > 0
+                ? ` · ${aiPlan.clubConflicts.map((conflict) => `${conflict.names.join(' vs ')} (${conflict.club})`).join(', ')} vẫn gặp nhau vòng 1 vì không còn cách xếp khác`
+                : ' · không có cặp cùng CLB ở vòng 1'}
+            </p>
+          )}
 
           <div className="bracket-container">
             {tournament.bracket.roundMatchIds.map((roundIds, roundIndex) => (
@@ -423,6 +472,9 @@ export function OrganizerTournamentDetailPage() {
                   const regA = match.participantARegistrationId ? regMap.get(match.participantARegistrationId) : null;
                   const regB = match.participantBRegistrationId ? regMap.get(match.participantBRegistrationId) : null;
                   const isFinished = match.winnerRegistrationId != null;
+                  const prediction = regA && regB && !isFinished
+                    ? predictMatch(match, data.tournamentRegistrations, data.matches)
+                    : null;
 
                   return (
                     <div key={match.id} className={`bracket-match-card ${isFinished ? 'is-finished' : ''}`}>
@@ -435,6 +487,16 @@ export function OrganizerTournamentDetailPage() {
                         <span>{regB ? regB.participantName : match.isBye ? 'Suất đặc cách (Bye)' : 'TBD'}</span>
                         {match.scoreB != null && <span className="bracket-score">{match.scoreB}</span>}
                       </div>
+
+                      {prediction && (
+                        <div className="bracket-ai-prediction">
+                          <AiBadge/>
+                          <span><strong>{regA?.participantName}</strong> {prediction.winA}% – {prediction.winB}% <strong>{regB?.participantName}</strong></span>
+                          <AiExplain title="Vì sao?" items={[
+                            { label: `Độ tin cậy ${prediction.confidence}`, detail: prediction.reason },
+                          ]}/>
+                        </div>
+                      )}
 
                       {!match.isBye && (
                         <div className="bracket-match-meta">
@@ -473,6 +535,8 @@ export function OrganizerTournamentDetailPage() {
             <tr>
               <th>VĐV chính</th>
               <th>Đồng đội (Đôi)</th>
+              <th>Trình độ</th>
+              <th>CLB</th>
               <th>Lệ phí</th>
               <th>Ngày đăng ký</th>
               <th>Trạng thái</th>
@@ -483,6 +547,8 @@ export function OrganizerTournamentDetailPage() {
               <tr key={reg.id}>
                 <td><strong>{reg.participantName}</strong></td>
                 <td>{reg.partnerName || '—'}</td>
+                <td>{reg.skillLevel ?? '—'}</td>
+                <td>{reg.club?.trim() || '—'}</td>
                 <td>{reg.fee.toLocaleString('vi-VN')}đ</td>
                 <td>{new Date(reg.createdAt).toLocaleDateString('vi-VN')}</td>
                 <td>{reg.reviewStatus === 'rejected' ? <Badge tone="warning">Đã từ chối</Badge> : isRegistrationApproved(reg) ? <Badge tone="success">Đã duyệt</Badge> : (
@@ -509,6 +575,12 @@ export function OrganizerTournamentDetailPage() {
             </div>
 
             <form onSubmit={handleSaveScore} className="score-form">
+              {activePrediction && activeRegA && activeRegB && (
+                <div className="ai-score-modal">
+                  <AiBadge/>
+                  <span>AI dự đoán trước trận: <strong>{activeRegA.participantName} {activePrediction.winA}% – {activePrediction.winB}% {activeRegB.participantName}</strong> · độ tin cậy {activePrediction.confidence}</span>
+                </div>
+              )}
               <div className="score-inputs-row">
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>{activeRegA?.participantName || 'VĐV 1'}</label>

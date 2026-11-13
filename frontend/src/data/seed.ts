@@ -5,6 +5,7 @@ import type {
   Enrollment,
   FinancialRecord,
   Payment,
+  SkillLevel,
   Student,
   TournamentRegistration,
 } from '../domain/types';
@@ -366,6 +367,8 @@ function createEnrollments(students: Student[]): Enrollment[] {
 
 function createTournamentRegistrations(students: Student[]): TournamentRegistration[] {
   const registrations: TournamentRegistration[] = [];
+  const seedClubs = ['CLB Bình Minh', 'CLB Sao Mai', 'CLB Phú Nhuận', 'CLB Thăng Long'];
+  const seedLevels: SkillLevel[] = ['Nâng cao', 'Trung cấp', 'Cơ bản', 'Mới bắt đầu'];
 
   for (let index = 0; index < 9; index += 1) {
     const name = PARTICIPANT_NAMES[(index * 2 + 1) % PARTICIPANT_NAMES.length];
@@ -380,6 +383,8 @@ function createTournamentRegistrations(students: Student[]): TournamentRegistrat
       paymentFee: 5_000,
       createdAt: `2026-10-${String(11 + index).padStart(2, '0')}T14:00:00+07:00`,
       paymentId: `pay-tournament-${index + 1}`,
+      skillLevel: seedLevels[index % seedLevels.length],
+      club: seedClubs[(index * 2) % seedClubs.length],
     });
   }
 
@@ -396,6 +401,8 @@ function createTournamentRegistrations(students: Student[]): TournamentRegistrat
       paymentFee: 8_000,
       createdAt: `2026-10-${String(20 + index).padStart(2, '0')}T16:30:00+07:00`,
       paymentId: `pay-tournament-${index + 20}`,
+      skillLevel: seedLevels[(index + 1) % seedLevels.length],
+      club: seedClubs[(index * 2 + 1) % seedClubs.length],
     });
   }
 

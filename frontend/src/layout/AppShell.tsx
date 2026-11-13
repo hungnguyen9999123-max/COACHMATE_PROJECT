@@ -8,6 +8,7 @@ import { createBrowserDemoRepository } from '../data/repository';
 import { useViewPreference } from '../data/useViewPreference';
 import { useDemoRole } from './DemoRoleProvider';
 import { AttentionPanel } from './AttentionPanel';
+import { AiAssistant } from './AiAssistant';
 import './app-shell.css';
 
 const PLATFORM_ROLES: DemoRole[] = ['student', 'coach', 'admin', 'organizer'];
@@ -69,5 +70,6 @@ export function AppShell() {
     <main className="app-page"><div className="app-page-inner">{location.pathname.endsWith('/dashboard') && <AttentionPanel role={activeRole}/>}<Outlet context={{role:activeRole}}/></div></main></div>
     <Modal open={searchOpen} title="Tìm kiếm CoachMate" onClose={() => setSearchOpen(false)}><div className="app-global-search"><TextInput type="search" aria-label="Từ khóa tìm kiếm toàn hệ thống" autoFocus leadingIcon={<Search size={18}/>} placeholder="Tên khóa học, giải đấu hoặc trang..." value={search} onChange={(event) => setSearch(event.target.value)}/><div className="app-search-results">{searchable.length ? searchable.map((item) => <Link key={`${item.meta}-${item.to}`} to={item.to} onClick={() => setSearchOpen(false)}><BookOpen size={17}/><span><strong>{item.title}</strong><small>{item.meta}</small></span><ChevronRight size={16}/></Link>) : <EmptyState title="Không có kết quả" description="Thử tìm tên khóa học, giải đấu hoặc tên trang."/>}</div></div></Modal>
     <Modal open={helpOpen} title="Khám phá bản demo CoachMate" onClose={() => setHelpOpen(false)}><div className="app-demo-help"><p>Chọn vai trò trong menu tài khoản để khám phá Học viên, Huấn luyện viên, Quản trị hệ thống và Ban tổ chức.</p><p>Đăng ký, thanh toán và các thao tác quản lý đều được mô phỏng. Dữ liệu được lưu trên trình duyệt đang sử dụng.</p><Button onClick={() => { setHelpOpen(false); navigate('/courses'); }}>Khám phá khóa học</Button><Link to="/design-system" onClick={() => setHelpOpen(false)}>Xem thư viện giao diện</Link></div></Modal>
+    <AiAssistant role={activeRole}/>
   </div>;
 }

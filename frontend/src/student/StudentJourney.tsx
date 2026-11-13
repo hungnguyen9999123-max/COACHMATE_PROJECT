@@ -5,10 +5,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Badge, Button, Card, EmptyState, FormField, PriceDisplay, Select, TextInput, useToast } from '../design-system/components';
 import { createBrowserDemoRepository } from '../data/repository';
 import { useViewPreference } from '../data/useViewPreference';
-import { DEFAULT_COURSE_COVER_IMAGE } from '../domain/constants';
+import { DEFAULT_COURSE_COVER_IMAGE, LEVELS } from '../domain/constants';
 import { findPublishedCourse } from '../domain/courses';
 import { createCourseEnrollment, createTournamentRegistration, getStudentCourses, getStudentPayments, getStudentTournaments, updateStudentProfile, type PaymentMethod } from '../domain/studentFlows';
-import type { DemoState, Student, TournamentStatus } from '../domain/types';
+import type { DemoState, SkillLevel, Student, TournamentStatus } from '../domain/types';
 import './student-journey.css';
 
 const PAYMENT_METHODS: PaymentMethod[] = ['Ví MoMo', 'Chuyển khoản ngân hàng', 'Thẻ ATM / Visa'];
@@ -18,20 +18,22 @@ function loadState() { return createBrowserDemoRepository().load(); }
 function saveState(state: DemoState) { createBrowserDemoRepository().save(state); }
 function currentStudent(state: DemoState) { return state.students.find((student) => student.id === state.currentStudentId)!; }
 
-function CheckoutFields({ student, includePartner = false, onSubmit, submitLabel }: {
-  student: Student; includePartner?: boolean; onSubmit: (values: { name: string; phone: string; email: string; partnerName: string; method: PaymentMethod }) => void; submitLabel: string;
+function CheckoutFields({ student, includePartner = false, includeSkillProfile = false, onSubmit, submitLabel }: {
+  student: Student; includePartner?: boolean; includeSkillProfile?: boolean; onSubmit: (values: { name: string; phone: string; email: string; partnerName: string; skillLevel: SkillLevel; club: string; method: PaymentMethod }) => void; submitLabel: string;
 }) {
   const [name, setName] = useState(student.name);
   const [phone, setPhone] = useState(student.phone);
   const [email, setEmail] = useState(student.email);
   const [partnerName, setPartnerName] = useState('');
+  const [skillLevel, setSkillLevel] = useState<SkillLevel>(student.level);
+  const [club, setClub] = useState('');
   const [method, setMethod] = useState<PaymentMethod>('Ví MoMo');
   const [error, setError] = useState('');
   const [reviewing, setReviewing] = useState(false);
-  const submit = (event: FormEvent) => { event.preventDefault(); if (!name.trim() || !phone.trim() || phone.replace(/\D/g,'').length < 9 || (includePartner && !partnerName.trim())) { setError('Kiểm tra họ tên, số điện thoại và thông tin đồng đội.'); return; } setError(''); if (!reviewing) { setReviewing(true); return; } onSubmit({ name, phone, email, partnerName, method }); };
+  const submit = (event: FormEvent) => { event.preventDefault(); if (!name.trim() || !phone.trim() || phone.replace(/\D/g,'').length < 9 || (includePartner && !partnerName.trim())) { setError('Kiểm tra họ tên, số điện thoại và thông tin đồng đội.'); return; } setError(''); if (!reviewing) { setReviewing(true); return; } onSubmit({ name, phone, email, partnerName, skillLevel, club, method }); };
   return <form className="journey-form" onSubmit={submit}>
-    {reviewing && <section className="journey-review" aria-label="Kiểm tra thông tin trước khi xác nhận"><h3>Kiểm tra lại thông tin</h3><dl><div><dt>Học viên</dt><dd>{name}</dd></div><div><dt>Số điện thoại</dt><dd>{phone}</dd></div>{includePartner && <div><dt>Đồng đội</dt><dd>{partnerName}</dd></div>}<div><dt>Phương thức demo</dt><dd>{method}</dd></div></dl><Button type="button" variant="outline" onClick={() => setReviewing(false)}>Chỉnh sửa thông tin</Button></section>}
-    <fieldset hidden={reviewing} style={{border:0,padding:0,margin:0}}><div className="journey-form-grid"><FormField label="Họ và tên" required><TextInput autoComplete="name" value={name} onChange={(event) => setName(event.target.value)}/></FormField><FormField label="Số điện thoại" required><TextInput autoComplete="tel" inputMode="tel" value={phone} onChange={(event) => setPhone(event.target.value)}/></FormField><FormField label="Email"><TextInput type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)}/></FormField>{includePartner && <FormField label="Tên đồng đội" required><TextInput value={partnerName} onChange={(event) => setPartnerName(event.target.value)} placeholder="Họ và tên đồng đội"/></FormField>}<FormField label="Phương thức thanh toán demo"><Select value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)}>{PAYMENT_METHODS.map((item) => <option key={item}>{item}</option>)}</Select></FormField></div></fieldset>
+    {reviewing && <section className="journey-review" aria-label="Kiểm tra thông tin trước khi xác nhận"><h3>Kiểm tra lại thông tin</h3><dl><div><dt>Học viên</dt><dd>{name}</dd></div><div><dt>Số điện thoại</dt><dd>{phone}</dd></div>{includePartner && <div><dt>Đồng đội</dt><dd>{partnerName}</dd></div>}{includeSkillProfile && <div><dt>Trình độ</dt><dd>{skillLevel}</dd></div>}{includeSkillProfile && club.trim() && <div><dt>Câu lạc bộ</dt><dd>{club}</dd></div>}<div><dt>Phương thức demo</dt><dd>{method}</dd></div></dl><Button type="button" variant="outline" onClick={() => setReviewing(false)}>Chỉnh sửa thông tin</Button></section>}
+    <fieldset hidden={reviewing} style={{border:0,padding:0,margin:0}}><div className="journey-form-grid"><FormField label="Họ và tên" required><TextInput autoComplete="name" value={name} onChange={(event) => setName(event.target.value)}/></FormField><FormField label="Số điện thoại" required><TextInput autoComplete="tel" inputMode="tel" value={phone} onChange={(event) => setPhone(event.target.value)}/></FormField><FormField label="Email"><TextInput type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)}/></FormField>{includePartner && <FormField label="Tên đồng đội" required><TextInput value={partnerName} onChange={(event) => setPartnerName(event.target.value)} placeholder="Họ và tên đồng đội"/></FormField>}{includeSkillProfile && <FormField label="Trình độ" hint="AI dùng thông tin này để xếp cặp cân bằng ở vòng đầu"><Select value={skillLevel} onChange={(event) => setSkillLevel(event.target.value as SkillLevel)}>{LEVELS.map((item) => <option key={item}>{item}</option>)}</Select></FormField>}{includeSkillProfile && <FormField label="Câu lạc bộ"><TextInput value={club} onChange={(event) => setClub(event.target.value)} placeholder="VD: CLB Bình Minh (không bắt buộc)"/></FormField>}<FormField label="Phương thức thanh toán demo"><Select value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)}>{PAYMENT_METHODS.map((item) => <option key={item}>{item}</option>)}</Select></FormField></div></fieldset>
     {error && <p className="journey-inline-error" role="alert"><CircleAlert size={15}/>{error}</p>}
     <div className="journey-demo-disclosure"><ShieldCheck size={17}/><span><strong>Thanh toán DEMO · Không thu tiền thật</strong><small>Xác nhận sẽ tạo đăng ký và giao dịch mô phỏng trong trình duyệt. Đăng ký giải đấu vẫn cần Ban tổ chức duyệt.</small></span></div>
     <Button type="submit">{reviewing ? submitLabel : 'Kiểm tra thông tin'} <ArrowRight size={16}/></Button>
@@ -173,13 +175,13 @@ export function TournamentRegistrationPage() {
   const submitting = useRef(false);
   const tournament = state.tournaments.find((item) => item.id === tournamentId);
   if (!tournament) return <JourneyNotFound title="Không tìm thấy giải đấu" backTo="/tournaments"/>;
-  const submit = (values: { name: string; phone: string; email: string; partnerName: string; method: PaymentMethod }) => {
+  const submit = (values: { name: string; phone: string; email: string; partnerName: string; skillLevel: SkillLevel; club: string; method: PaymentMethod }) => {
     if (submitting.current) return;
     submitting.current = true;
     try { const result = createTournamentRegistration(loadState(), tournament.id, values); saveState(result.state); navigate(`/me/confirmation/tournament/${result.recordId}`); }
     catch (error) { submitting.current = false; toast(error instanceof Error ? error.message : 'Không thể đăng ký giải.', 'error'); }
   };
-  return <div className="journey-page"><header className="journey-heading"><button className="journey-back" onClick={() => navigate(`/tournaments/${tournament.id}`)}><ArrowLeft size={15}/> Quay lại giải đấu</button><Badge tone="success">ĐĂNG KÝ GIẢI</Badge><h2>{tournament.name}</h2><p>{date(tournament.date)} · {tournament.venue}</p></header><Card className="journey-form-card"><h3>{tournament.format === 'doubles' ? 'Thông tin cặp đấu' : 'Thông tin vận động viên'}</h3><CheckoutFields student={currentStudent(state)} includePartner={tournament.format === 'doubles'} onSubmit={submit} submitLabel={`Xác nhận · ${money(tournament.fee)}`}/></Card></div>;
+  return <div className="journey-page"><header className="journey-heading"><button className="journey-back" onClick={() => navigate(`/tournaments/${tournament.id}`)}><ArrowLeft size={15}/> Quay lại giải đấu</button><Badge tone="success">ĐĂNG KÝ GIẢI</Badge><h2>{tournament.name}</h2><p>{date(tournament.date)} · {tournament.venue}</p></header><Card className="journey-form-card"><h3>{tournament.format === 'doubles' ? 'Thông tin cặp đấu' : 'Thông tin vận động viên'}</h3><CheckoutFields student={currentStudent(state)} includePartner={tournament.format === 'doubles'} includeSkillProfile onSubmit={submit} submitLabel={`Xác nhận · ${money(tournament.fee)}`}/></Card></div>;
 }
 
 export function MyCoursesPage() {

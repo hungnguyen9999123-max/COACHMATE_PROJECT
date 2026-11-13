@@ -86,6 +86,7 @@ export interface TournamentCostPlan {
 export interface TournamentBracket {
   size: number;
   roundMatchIds: Id[][];
+  mode?: 'ai' | 'classic';
 }
 
 export interface Tournament {
@@ -121,6 +122,8 @@ export interface TournamentRegistration {
   createdAt: string;
   paymentId: Id;
   reviewStatus?: 'pending' | 'approved' | 'rejected';
+  skillLevel?: SkillLevel;
+  club?: string;
 }
 
 export interface Court {

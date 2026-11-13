@@ -6,9 +6,11 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { SportImage } from '../design-system/SportImage';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Badge, Button, Card, EmptyState, FormField, Rating, Select, TextInput, useToast } from '../design-system/components';
+import { AiBadge, AiExplain } from '../design-system/AiExplain';
 import { createBrowserDemoRepository } from '../data/repository';
 import { cancelCoachPro, createCourseByCoach, getCoachOverview, getCoachStudents, subscribeCoachPro, updateCoachProfile, updateCourseContentByCoach } from '../domain/coachFlows';
 import { DEFAULT_COURSE_COVER_IMAGE } from '../domain/constants';
+import { forecastCoachCourses } from '../domain/forecast';
 import type { Course, CourseType, DemoState, SkillLevel } from '../domain/types';
 import './coach.css';
 
@@ -27,6 +29,7 @@ export function CoachDashboardPage() {
   const data = loadState();
   const overview = useMemo(() => getCoachOverview(data, DEFAULT_COACH_ID), [data]);
   const students = useMemo(() => getCoachStudents(data, DEFAULT_COACH_ID), [data]);
+  const forecasts = useMemo(() => forecastCoachCourses(data, DEFAULT_COACH_ID), [data]);
 
   return (
     <div className="coach-page">
@@ -73,6 +76,28 @@ export function CoachDashboardPage() {
           <div className="coach-kpi-sub">Đã trừ {data.settings.commissionPercent}% hoa hồng CoachMate</div>
         </div>
       </div>
+
+      <section className="ai-forecast">
+        <div className="ai-forecast-head">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><AiBadge/><h3>Dự báo lớp sắp mở</h3></div>
+          <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{forecasts.length} khóa đang theo dõi</span>
+        </div>
+        <div className="ai-forecast-list">{forecasts.map((forecast) => <div className="ai-forecast-row" key={forecast.courseId}>
+          <div>
+            <strong>{forecast.courseTitle}</strong>
+            <small>{forecast.current}/{forecast.minStudents} học viên tối thiểu · còn {forecast.daysToStart} ngày tới khai giảng</small>
+          </div>
+          <span className={`ai-forecast-pill is-${forecast.risk}`}>{forecast.label} · {Math.round(forecast.probability * 100)}%</span>
+          <div>
+            <small>{forecast.reason}</small>
+            <AiExplain items={[
+              { label: `Tốc độ đăng ký · ${forecast.velocityPerDay.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}/ngày`, detail: 'Tính từ ngày có học viên đầu tiên đến hôm nay' },
+              { label: `Dự phóng · ${forecast.projected.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}/${forecast.minStudents} học viên`, detail: `Với ${forecast.daysToStart} ngày còn lại trước khai giảng` },
+              { label: `Xác suất mở lớp · ${Math.round(forecast.probability * 100)}%`, detail: 'Mô hình logistic quanh ngưỡng học viên tối thiểu' },
+            ]}/>
+          </div>
+        </div>)}</div>
+      </section>
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
         <Button onClick={() => navigate('/coach/courses/new')}>

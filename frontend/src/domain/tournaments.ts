@@ -24,13 +24,13 @@ export function isRegistrationApproved(registration: TournamentRegistration) {
   return registration.reviewStatus !== 'pending' && registration.reviewStatus !== 'rejected';
 }
 
-function nextPowerOfTwo(value: number) {
+export function nextPowerOfTwo(value: number) {
   let size = 2;
   while (size < value) size *= 2;
   return size;
 }
 
-function formatTime(totalMinutes: number) {
+export function formatTime(totalMinutes: number) {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;

@@ -6,11 +6,13 @@ import { useMemo, useState } from 'react';
 import { SportImage } from '../design-system/SportImage';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Badge, Button, Card, EmptyState, FormField, PriceDisplay, Rating, Select, Skeleton } from '../design-system/components';
+import { AiBadge, AiExplain } from '../design-system/AiExplain';
 import { createBrowserDemoRepository } from '../data/repository';
 import { useCourseFavorites } from '../data/useCourseFavorites';
 import { useViewPreference } from '../data/useViewPreference';
 import { DEFAULT_COURSE_COVER_IMAGE } from '../domain/constants';
 import { findPublishedCourse, getCoachRating, searchFilterAndSortCourses, type CourseSort } from '../domain/courses';
+import { recommendCourses } from '../domain/recommendations';
 import type { Coach, Course, CourseFilters, CourseType, SkillLevel } from '../domain/types';
 import './course-marketplace.css';
 
@@ -72,6 +74,7 @@ export function CourseMarketplace() {
   const [favoritesOnly, setFavoritesOnly] = useViewPreference('courses-favorites-only', false);
   const [loading, setLoading] = useState(false);
   const areaOptions = [...new Set(data.courses.map((course) => course.area))];
+  const recommendations = recommendCourses(data, data.currentStudentId, 3);
   const results = searchFilterAndSortCourses(data.courses, data.coaches, new Set(['c1']), {
     ...filters, query,
   }, sort).filter((course) => !selectedTypes.length || selectedTypes.includes(course.type))
@@ -84,6 +87,22 @@ export function CourseMarketplace() {
 
   return <div className="course-marketplace">
     <section className="market-hero"><div className="market-hero-content"><Badge tone="lime"><Sparkles size={13}/> HỌC CÙNG HLV TẬN TÂM</Badge><h2>Tìm lớp cầu lông<br/><span>hợp với nhịp của bạn.</span></h2><p>Từ những bước chân đầu tiên đến cú smash tự tin. Khám phá lớp học chất lượng ngay gần bạn.</p><form className="market-hero-search" onSubmit={submitSearch}><Search size={19}/><input aria-label="Tìm theo tên khóa, huấn luyện viên hoặc từ khóa" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Bạn muốn cải thiện kỹ năng nào?"/><Button type="submit">Tìm khóa học</Button></form><div className="market-hero-trust"><span><BadgeCheck size={15}/> HLV được đánh giá</span><span><MapPin size={15}/> Lớp học tại TP.HCM</span><span><Users size={15}/> Nhóm học phù hợp</span></div></div><div className="market-hero-art"><SportImage src="https://i.pinimg.com/736x/b9/3d/db/b93ddb9ebaa794011a4c4afb3856d487.jpg" alt="Người chơi cầu lông trên sân trong nhà"/><div className="market-hero-float"><span className="market-float-icon"><Star size={16} fill="currentColor"/></span><span><strong>Huấn luyện viên được học viên đánh giá</strong><small>Xem điểm đánh giá trên từng khóa học</small></span></div><div className="market-hero-caption">Bắt đầu hành trình của bạn</div></div></section>
+
+    {recommendations.length > 0 && <section className="ai-recommend" aria-labelledby="ai-recommend-title">
+      <div className="ai-recommend-head"><div><AiBadge/><h2 id="ai-recommend-title">Dành cho bạn</h2><p>AI chấm điểm theo trình độ, khu vực, lịch học, ngân sách và đánh giá huấn luyện viên.</p></div></div>
+      <div className="ai-recommend-grid">{recommendations.map((item) => {
+        const coach = data.coaches.find((candidate) => candidate.id === item.course.coachId);
+        return <article className="ai-recommend-card" key={item.course.id}>
+          <h3><Link to={`/courses/${item.course.id}`}>{item.course.title}</Link></h3>
+          <div className="ai-recommend-meta">{coach?.name ?? 'HLV'} · {item.course.level} · {item.course.area} · {item.course.price.toLocaleString('vi-VN')}đ</div>
+          <ul className="ai-recommend-reasons">{item.reasons.slice(0, 3).map((reason) => <li key={reason}>{reason}</li>)}</ul>
+          <div className="ai-recommend-footer">
+            <span className="ai-score">{item.score}/100 điểm</span>
+            <AiExplain items={item.breakdown.map((entry) => ({ label: `${entry.label} · ${entry.points}/${entry.max}`, detail: entry.detail }))}/>
+          </div>
+        </article>;
+      })}</div>
+    </section>}
 
     <section className="market-listing" aria-labelledby="market-listing-title"><div className="market-section-heading"><div><span className="market-eyebrow">COACHMATE BADMINTON</span><h2 id="market-listing-title">Khóa học được yêu thích</h2><p>Chọn lớp học phù hợp với mục tiêu và lịch trình của bạn.</p></div><button className={`market-favorites-filter ${favoritesOnly ? 'is-active' : ''}`} onClick={() => setFavoritesOnly(!favoritesOnly)}><Heart size={16} fill={favoritesOnly ? 'currentColor' : 'none'}/> Đã lưu <span>{favoriteIds.length}</span></button></div>
 
