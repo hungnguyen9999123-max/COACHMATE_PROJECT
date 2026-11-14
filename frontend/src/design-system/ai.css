@@ -291,6 +291,33 @@
   background: #1a2e05;
 }
 
+.ai-assistant-nudge {
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 10px 13px;
+  border: 1px solid #bef264;
+  border-radius: 14px 14px 4px 14px;
+  background: #f7fee7;
+  color: #365314;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  box-shadow: 0 12px 28px rgba(54, 83, 20, 0.18);
+  cursor: pointer;
+  animation: ai-nudge-in 240ms ease-out;
+}
+
+@keyframes ai-nudge-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .ai-assistant-panel {
   width: min(400px, calc(100vw - 32px));
   max-height: min(620px, calc(100vh - 120px));

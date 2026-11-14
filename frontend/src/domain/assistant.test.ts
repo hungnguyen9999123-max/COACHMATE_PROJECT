@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { createSeedState } from '../data/seed';
-import { askAssistant, suggestQuestions } from './assistant';
+import {
+  askAssistant,
+  getPageContext,
+  getProactiveNudge,
+  getWelcomeMessage,
+  suggestQuestions,
+} from './assistant';
 
 const state = createSeedState();
 
@@ -64,5 +70,49 @@ describe('AI rule-based assistant', () => {
     expect(result.intent).toBe('tro-giup');
     expect(result.chips).toEqual(suggestQuestions('student'));
     expect(suggestQuestions('organizer')).toContain('Ai vô địch?');
+  });
+
+  it('parses page context from pathname correctly', () => {
+    expect(getPageContext('/courses/k1')).toEqual({
+      pathname: '/courses/k1',
+      entityId: 'k1',
+      entityType: 'course',
+    });
+    expect(getPageContext('/tournaments/t1')).toEqual({
+      pathname: '/tournaments/t1',
+      entityId: 't1',
+      entityType: 'tournament',
+    });
+    expect(getPageContext('/me/courses')).toEqual({
+      pathname: '/me/courses',
+      entityType: 'my-courses',
+    });
+  });
+
+  it('generates dynamic welcome messages and chips based on PageContext', () => {
+    const courseContext = getPageContext('/courses/k1');
+    const welcome = getWelcomeMessage('student', courseContext, state);
+    const chips = suggestQuestions('student', courseContext);
+
+    expect(welcome).toContain('Bạn đang xem một khóa học');
+    expect(chips).toContain('Khóa này có hợp với tôi không?');
+  });
+
+  it('answers entity-aware questions when page context is provided', () => {
+    const courseContext = getPageContext('/courses/k1');
+    const result = askAssistant('Khóa này có hợp với tôi không?', state, 'student', new Date(), courseContext);
+
+    expect(result.intent).toBe('danh-gia-khoa-hoc');
+    expect(result.text).toContain('độ phù hợp với bạn');
+    expect(result.actions.some((a) => a.to === '/courses/k1/checkout')).toBe(true);
+  });
+
+  it('generates proactive nudge for recommended course details page', () => {
+    const courseContext = getPageContext('/courses/k3');
+    const nudge = getProactiveNudge('student', courseContext, state);
+
+    expect(nudge).not.toBeNull();
+    expect(nudge?.id).toBe('nudge-course-k3');
+    expect(nudge?.prompt).toBe('Khóa này có hợp với tôi không?');
   });
 });

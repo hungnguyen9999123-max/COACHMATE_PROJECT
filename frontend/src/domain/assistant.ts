@@ -17,6 +17,22 @@ export interface AssistantAnswer {
   chips: string[];
 }
 
+export type AssistantEntityType = 'course' | 'tournament' | 'course-list' | 'tournament-list' | 'my-courses' | 'my-tournaments' | 'other';
+
+export interface AssistantPageContext {
+  pathname: string;
+  entityId?: string;
+  entityType?: AssistantEntityType;
+}
+
+export interface ProactiveNudge {
+  id: string;
+  title: string;
+  message: string;
+  prompt: string;
+  actionLabel?: string;
+}
+
 const DEFAULT_COACH_ID = 'c1';
 
 const SUGGESTIONS: Record<PlatformRole, string[]> = {
@@ -41,6 +57,104 @@ const SUGGESTIONS: Record<PlatformRole, string[]> = {
     'Tìm lớp Quận 7 dưới 2 triệu',
   ],
 };
+
+export function getAssistantPageContext(pathname: string): AssistantPageContext {
+  const courseMatch = pathname.match(/^\/courses\/([^/]+)/);
+  if (courseMatch) return { pathname, entityId: courseMatch[1], entityType: 'course' };
+  if (pathname === '/courses') return { pathname, entityType: 'course-list' };
+  const tournamentMatch = pathname.match(/^\/tournaments\/([^/]+)/);
+  if (tournamentMatch) return { pathname, entityId: tournamentMatch[1], entityType: 'tournament' };
+  if (pathname === '/tournaments') return { pathname, entityType: 'tournament-list' };
+  if (pathname === '/me/courses') return { pathname, entityType: 'my-courses' };
+  if (pathname === '/me/tournaments') return { pathname, entityType: 'my-tournaments' };
+  return { pathname, entityType: 'other' };
+}
+
+export const getPageContext = getAssistantPageContext;
+
+export function assistantWelcome(role: PlatformRole, context?: AssistantPageContext, state?: DemoState): string {
+  if (context?.entityType === 'course' && context.entityId) {
+    const course = state?.courses.find((c) => c.id === context.entityId);
+    if (course) return `Bạn đang xem khóa "${course.title}". Tôi có thể đánh giá độ phù hợp, đọc lịch học hoặc giới thiệu HLV.`;
+    return 'Bạn đang xem một khóa học. Tôi có thể đánh giá độ phù hợp, đọc lịch học hoặc giới thiệu HLV.';
+  }
+  if (context?.entityType === 'tournament' && context.entityId) {
+    const tournament = state?.tournaments.find((t) => t.id === context.entityId);
+    if (tournament) return `Bạn đang xem giải đấu "${tournament.name}". Tôi có thể đọc điều kiện, lệ phí và lịch thi đấu của giải này.`;
+    return 'Bạn đang xem một giải đấu. Tôi có thể đọc điều kiện, lệ phí và lịch thi đấu của giải này.';
+  }
+  if (context?.entityType === 'course-list') return 'Chào bạn! Bạn đang tìm lớp? Tôi có thể gợi ý lớp gần bạn, đúng trình độ hoặc học phí phù hợp.';
+  if (context?.entityType === 'tournament-list') return 'Chào bạn! Tôi có thể tư vấn giải đấu vừa sức với trình độ của bạn hoặc tra cứu lệ phí.';
+  if (context?.entityType === 'my-courses' || context?.entityType === 'my-tournaments') return 'Chào bạn! Dưới đây là lịch học và thi đấu của bạn. Cần tôi nhắc lịch hay hỗ trợ gì thêm?';
+  return role === 'student'
+    ? 'Chào bạn! Tôi có thể tìm lớp hợp trình độ, giải đấu phù hợp và nhắc lịch học của bạn.'
+    : role === 'coach'
+      ? 'Chào HLV! Tôi có thể dự báo lớp sắp mở, đọc doanh thu và tìm giải đấu.'
+      : role === 'organizer'
+        ? 'Chào Ban tổ chức! Tôi có thể đọc lịch thi đấu, giải sắp tới và nhà vô địch.'
+        : 'Chào quản trị viên! Tôi có thể đọc doanh thu nền tảng, giải đấu và gợi ý khóa học.';
+}
+
+export const getWelcomeMessage = assistantWelcome;
+
+export function getProactiveNudge(role: PlatformRole, context?: AssistantPageContext, state?: DemoState): ProactiveNudge | null {
+  if (role !== 'student' || !context || !state) return null;
+
+  if (context.entityType === 'course' && context.entityId) {
+    const course = state.courses.find((c) => c.id === context.entityId && c.status === 'published');
+    if (!course) return null;
+    const isEnrolled = state.enrollments.some((e) => e.studentId === state.currentStudentId && e.courseId === course.id);
+    if (isEnrolled) {
+      return {
+        id: `nudge-enrolled-${course.id}`,
+        title: '💡 Khóa học đã đăng ký',
+        message: `Bạn đã đăng ký khóa "${course.title}". Nhấn để xem lịch học chi tiết.`,
+        prompt: 'Xem lịch học khóa này',
+        actionLabel: 'Xem lịch học',
+      };
+    }
+    const recommendations = recommendCourses(state, state.currentStudentId, state.courses.length);
+    const rec = recommendations.find((item) => item.course.id === course.id);
+    if (rec && rec.score >= 50) {
+      return {
+        id: `nudge-course-${course.id}`,
+        title: '💡 Gợi ý từ AI CoachMate',
+        message: `Khóa "${course.title}" đạt ${rec.score}/100 điểm phù hợp với bạn! Nhấn để xem chi tiết.`,
+        prompt: 'Khóa này có hợp với tôi không?',
+        actionLabel: 'Xem đánh giá AI',
+      };
+    }
+  }
+
+  if (context.entityType === 'course-list') {
+    const topRec = recommendCourses(state, state.currentStudentId, 1)[0];
+    if (topRec) {
+      return {
+        id: 'nudge-courses-market',
+        title: '💡 Lớp học dành cho bạn',
+        message: `AI gợi ý lớp "${topRec.course.title}" (${topRec.score}/100 điểm) tại ${topRec.course.area}.`,
+        prompt: 'Gợi ý lớp phù hợp nhất',
+        actionLabel: 'Xem gợi ý',
+      };
+    }
+  }
+
+  if (context.entityType === 'tournament-list') {
+    const openTour = state.tournaments.find((t) => t.status === 'open');
+    if (openTour) {
+      return {
+        id: `nudge-tournaments-${openTour.id}`,
+        title: '🏆 Giải đấu đang mở đăng ký',
+        message: `Giải "${openTour.name}" tại ${openTour.venue} đang nhận đăng ký.`,
+        prompt: 'Giải đấu nào sắp tới?',
+        actionLabel: 'Tư vấn giải đấu',
+      };
+    }
+  }
+
+  return null;
+}
+
 
 function normalize(text: string) {
   return text
@@ -89,12 +203,28 @@ function parseBudget(question: string): number | null {
   return plain ? Number(plain[1]) : null;
 }
 
-function chips(role: PlatformRole) {
+function chips(role: PlatformRole, context?: AssistantPageContext) {
+  if (!context?.entityType) return SUGGESTIONS[role].slice(0, 3);
+  if (context.entityType === 'course') {
+    return ['Khóa này có hợp với tôi không?', 'Xem lịch học khóa này', 'HLV này dạy thế nào?'];
+  }
+  if (context.entityType === 'tournament') {
+    return ['Tôi có nên đăng ký giải này?', 'Địa điểm & lệ phí giải này', 'Lịch thi đấu giải này'];
+  }
+  if (context.entityType === 'course-list') {
+    return ['Gợi ý lớp phù hợp nhất', 'Lớp cuối tuần', 'Lớp dưới 2 triệu'];
+  }
+  if (context.entityType === 'tournament-list') {
+    return ['Giải nào sắp tới?', 'Giải phù hợp trình độ của tôi', 'Giải tôi đã đăng ký'];
+  }
+  if (context.entityType === 'my-courses' || context.entityType === 'my-tournaments') {
+    return ['Lịch sắp tới của tôi', 'Khi nào tôi thi đấu?', 'Khám phá thêm khóa học mới'];
+  }
   return SUGGESTIONS[role].slice(0, 3);
 }
 
-function answer(intent: string, text: string, actions: AssistantAction[], role: PlatformRole): AssistantAnswer {
-  return { intent, text, actions, chips: chips(role) };
+function answer(intent: string, text: string, actions: AssistantAction[], role: PlatformRole, context?: AssistantPageContext): AssistantAnswer {
+  return { intent, text, actions, chips: chips(role, context) };
 }
 
 function courseLine(course: Course, state: DemoState) {
@@ -112,6 +242,7 @@ function courseAnswer(question: string, state: DemoState, role: PlatformRole): A
     if (!recommendations.length) {
       return answer('goi-y-khoa-hoc', 'Hiện chưa có khóa học nào còn chỗ. Bạn thử xem lại toàn bộ chợ khóa học nhé.', [{ label: 'Mở chợ khóa học', to: '/courses' }], role);
     }
+
     return answer(
       'goi-y-khoa-hoc',
       `Dựa trên hồ sơ của bạn, tôi gợi ý ${recommendations.length} khóa phù hợp nhất:\n${recommendations
@@ -155,6 +286,49 @@ function courseAnswer(question: string, state: DemoState, role: PlatformRole): A
   );
 }
 
+function courseContextAnswer(question: string, state: DemoState, role: PlatformRole, context: AssistantPageContext): AssistantAnswer | null {
+  if (!context.entityId) return null;
+  const course = state.courses.find((item) => item.id === context.entityId);
+  if (!course) return null;
+  const normalized = normalize(question);
+  const recommendation = recommendCourses(state, state.currentStudentId, state.courses.length).find((item) => item.course.id === course.id);
+
+  if (/(lich|ngay|gio|hoc khi nao|khai giang|buoi)/.test(normalized)) {
+    return answer(
+      'lich-khoa-hoc',
+      `Lịch học của ${course.title}: ${course.days}, ${course.time}, ${course.sessions} buổi, khai giảng ${dateLabel(course.startDate)} tại ${course.venue}.`,
+      [{ label: 'Xem chi tiết khóa học', to: `/courses/${course.id}` }],
+      role,
+      context,
+    );
+  }
+
+  if (/(hop voi toi|nen hoc|phu hop|danh gia|diem|recommend)/.test(normalized)) {
+    const score = recommendation?.score ?? 0;
+    const reasons = recommendation?.reasons.slice(0, 3) ?? ['Khóa học đang mở đăng ký và còn chỗ'];
+    return answer(
+      'danh-gia-khoa-hoc',
+      `Khóa ${course.title} đạt ${Math.round(score)}% độ phù hợp với bạn.\n${reasons.map((reason) => `• ${reason}`).join('\n')}\nHọc phí ${money(course.price)}, trình độ ${course.level}, khu vực ${course.area}.`,
+      [{ label: 'Đăng ký khóa học', to: `/courses/${course.id}/checkout` }],
+      role,
+      context,
+    );
+  }
+
+  if (/(hlv|coach|huan luyen vien|day the nao)/.test(normalized)) {
+    const coach = state.coaches.find((item) => item.id === course.coachId);
+    return answer(
+      'thong-tin-hlv',
+      `${coach?.name ?? 'HLV của khóa học'} phụ trách ${course.title}. ${coach?.bio ?? 'Thông tin giới thiệu đang được cập nhật.'}`,
+      [{ label: 'Xem khóa học', to: `/courses/${course.id}` }],
+      role,
+      context,
+    );
+  }
+
+  return null;
+}
+
 function tournamentAnswer(state: DemoState, role: PlatformRole): AssistantAnswer {
   const upcoming = state.tournaments
     .filter((tournament) => tournament.status !== 'finished')
@@ -173,6 +347,35 @@ function tournamentAnswer(state: DemoState, role: PlatformRole): AssistantAnswer
     upcoming.map((tournament) => ({ label: tournament.name, to: `/tournaments/${tournament.id}` })),
     role,
   );
+}
+
+function tournamentContextAnswer(question: string, state: DemoState, role: PlatformRole, context: AssistantPageContext): AssistantAnswer | null {
+  if (!context.entityId) return null;
+  const tournament = state.tournaments.find((item) => item.id === context.entityId);
+  if (!tournament) return null;
+  const normalized = normalize(question);
+
+  if (/(dia diem|le phi|phi|dang ky|han dang ky|dieu kien)/.test(normalized)) {
+    return answer(
+      'thong-tin-giai-dau',
+      `${tournament.name} diễn ra tại ${tournament.venue} ngày ${dateLabel(tournament.date)}. Lệ phí ${money(tournament.fee)}, hạn đăng ký ${dateLabel(tournament.registrationDeadline)}. Trình độ: ${tournament.level}.`,
+      [{ label: 'Đăng ký giải đấu', to: `/tournaments/${tournament.id}/register` }],
+      role,
+      context,
+    );
+  }
+
+  if (/(lich|ngay|thi dau|khi nao)/.test(normalized)) {
+    return answer(
+      'lich-giai-dau',
+      `${tournament.name} thi đấu ngày ${dateLabel(tournament.date)} tại ${tournament.venue}.`,
+      [{ label: 'Xem giải đấu', to: `/tournaments/${tournament.id}` }],
+      role,
+      context,
+    );
+  }
+
+  return null;
 }
 
 function studentScheduleAnswer(state: DemoState, role: PlatformRole): AssistantAnswer {
@@ -302,8 +505,8 @@ function fallbackAnswer(role: PlatformRole): AssistantAnswer {
   );
 }
 
-export function suggestQuestions(role: PlatformRole): string[] {
-  return SUGGESTIONS[role];
+export function suggestQuestions(role: PlatformRole, context?: AssistantPageContext): string[] {
+  return chips(role, context);
 }
 
 /**
@@ -315,39 +518,50 @@ export function askAssistant(
   state: DemoState,
   role: PlatformRole,
   _now = new Date(),
+  pageContext?: AssistantPageContext,
 ): AssistantAnswer {
   const normalized = normalize(question.trim());
-  if (!normalized) return fallbackAnswer(role);
+  const contextualize = (result: AssistantAnswer) => pageContext ? { ...result, chips: chips(role, pageContext) } : result;
+  if (!normalized) return contextualize(fallbackAnswer(role));
+
+  if (pageContext?.entityType === 'course') {
+    const contextualAnswer = courseContextAnswer(question, state, role, pageContext);
+    if (contextualAnswer) return contextualize(contextualAnswer);
+  }
+  if (pageContext?.entityType === 'tournament') {
+    const contextualAnswer = tournamentContextAnswer(question, state, role, pageContext);
+    if (contextualAnswer) return contextualize(contextualAnswer);
+  }
 
   if (/(doanh thu|loi nhuan|hoa hong|gmv|tai chinh|dong tien)/.test(normalized)) {
-    return financeAnswer(state, role);
+    return contextualize(financeAnswer(state, role));
   }
 
   if (/(nguy co|huy lop|du bao|lop sap mo|sap du nguoi|can them hoc vien)/.test(normalized)) {
-    return forecastAnswer(state, role);
+    return contextualize(forecastAnswer(state, role));
   }
 
   if (/(vo dich|champion|nha vo dich)/.test(normalized)) {
-    return championAnswer(state, role);
+    return contextualize(championAnswer(state, role));
   }
 
   if (normalized.includes('lich')) {
-    if (role === 'organizer') return organizerScheduleAnswer(state, role);
-    if (role === 'student') return studentScheduleAnswer(state, role);
-    return forecastAnswer(state, role);
+    if (role === 'organizer') return contextualize(organizerScheduleAnswer(state, role));
+    if (role === 'student') return contextualize(studentScheduleAnswer(state, role));
+    return contextualize(forecastAnswer(state, role));
   }
 
   if (/(giai dau|tournament|co giai|giai nao|mini cup)/.test(normalized)) {
-    return tournamentAnswer(state, role);
+    return contextualize(tournamentAnswer(state, role));
   }
 
   if (/(khoa hoc|tim lop|hoc phi|lop hoc|hlv|coach|dang ky hoc|goi y|phu hop)/.test(normalized)) {
-    return courseAnswer(question, state, role);
+    return contextualize(courseAnswer(question, state, role));
   }
 
   if (parseArea(normalized) || parseLevel(normalized) || parseBudget(normalized)) {
-    return courseAnswer(question, state, role);
+    return contextualize(courseAnswer(question, state, role));
   }
 
-  return fallbackAnswer(role);
+  return contextualize(fallbackAnswer(role));
 }
