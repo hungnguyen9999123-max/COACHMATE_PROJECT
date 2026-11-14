@@ -1,9 +1,10 @@
 import { MessageCircle, Send, Sparkles, X } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AiBadge } from '../design-system/AiExplain';
 import { createBrowserDemoRepository } from '../data/repository';
-import { askAssistant, suggestQuestions, type AssistantAction } from '../domain/assistant';
+import { askAssistant, assistantWelcome, getAssistantPageContext, suggestQuestions, type AssistantAction } from '../domain/assistant';
+import { recommendCourses } from '../domain/recommendations';
 import type { DemoRole } from '../navigation/roleNavigation';
 
 interface ChatMessage {
@@ -14,13 +15,6 @@ interface ChatMessage {
   chips?: string[];
 }
 
-const WELCOME: Record<DemoRole, string> = {
-  student: 'Chào bạn! Tôi có thể tìm lớp hợp trình độ, giải đấu phù hợp và nhắc lịch học của bạn.',
-  coach: 'Chào HLV! Tôi có thể dự báo lớp sắp mở, đọc doanh thu và tìm giải đấu.',
-  organizer: 'Chào Ban tổ chức! Tôi có thể đọc lịch thi đấu, giải sắp tới và nhà vô địch.',
-  admin: 'Chào quản trị viên! Tôi có thể đọc doanh thu nền tảng, giải đấu và gợi ý khóa học.',
-};
-
 let messageSequence = 0;
 
 function nextMessageId() {
@@ -28,24 +22,40 @@ function nextMessageId() {
   return `ai-message-${messageSequence}`;
 }
 
-function welcomeMessages(role: DemoRole): ChatMessage[] {
+function welcomeMessages(role: DemoRole, pageContext: ReturnType<typeof getAssistantPageContext>): ChatMessage[] {
   return [{
     id: nextMessageId(),
     from: 'ai',
-    text: WELCOME[role],
-    chips: suggestQuestions(role),
+    text: assistantWelcome(role, pageContext),
+    chips: suggestQuestions(role, pageContext),
   }];
 }
 
 export function AiAssistant({ role }: { role: DemoRole }) {
+  const location = useLocation();
+  const pageContext = getAssistantPageContext(location.pathname);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>(() => welcomeMessages(role));
+  const [nudge, setNudge] = useState<{ score: number; question: string } | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => welcomeMessages(role, pageContext));
   const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMessages(welcomeMessages(role));
-  }, [role]);
+    setMessages(welcomeMessages(role, pageContext));
+    setNudge(null);
+  }, [role, location.pathname]);
+
+  useEffect(() => {
+    if (role !== 'student' || pageContext.entityType !== 'course' || !pageContext.entityId) return;
+    const state = createBrowserDemoRepository().load();
+    const recommendation = recommendCourses(state, state.currentStudentId, state.courses.length)
+      .find((item) => item.course.id === pageContext.entityId);
+    if (!recommendation || recommendation.score < 80) return;
+    const timer = window.setTimeout(() => {
+      setNudge({ score: Math.round(recommendation.score), question: 'Khóa này có hợp với tôi không?' });
+    }, 6000);
+    return () => window.clearTimeout(timer);
+  }, [role, location.pathname, pageContext.entityId, pageContext.entityType]);
 
   useEffect(() => {
     if (!open || !bodyRef.current) return;
@@ -56,7 +66,7 @@ export function AiAssistant({ role }: { role: DemoRole }) {
     const trimmed = question.trim();
     if (!trimmed) return;
     const state = createBrowserDemoRepository().load();
-    const answer = askAssistant(trimmed, state, role);
+    const answer = askAssistant(trimmed, state, role, new Date(), pageContext);
     setMessages((current) => [
       ...current,
       { id: nextMessageId(), from: 'user', text: trimmed },
@@ -69,6 +79,7 @@ export function AiAssistant({ role }: { role: DemoRole }) {
       },
     ]);
     setInput('');
+    setNudge(null);
   };
 
   const submit = (event: FormEvent) => {
@@ -77,6 +88,9 @@ export function AiAssistant({ role }: { role: DemoRole }) {
   };
 
   return <div className="ai-assistant-root">
+    {nudge && !open && <button className="ai-assistant-nudge" onClick={() => { setOpen(true); send(nudge.question); }} aria-label="Mở gợi ý từ trợ lý AI">
+      💡 Khóa học này đạt {nudge.score}% độ phù hợp với bạn! Nhấn để xem lý do.
+    </button>}
     {open && <section className="ai-assistant-panel" aria-label="Trợ lý AI CoachMate">
       <header className="ai-assistant-head">
         <div>
