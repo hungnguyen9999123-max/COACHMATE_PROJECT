@@ -95,7 +95,7 @@ describe('Organizer Flows Domain Logic', () => {
     expect(rejected.tournamentRegistrations.find((registration) => registration.id === 'r1')?.reviewStatus).toBe('rejected');
     expect(rejected.payments.find((payment) => payment.id === 'pay-tournament-1')?.status).toBe('refunded');
     expect(() => rejectTournamentRegistrationByOrganizer(rejected, 't1', 'r1')).toThrow('Đăng ký này không còn chờ duyệt.');
-    expect(generateBracketByOrganizer(rejected, 't1').matches).toHaveLength(7);
+    expect(generateBracketByOrganizer(rejected, 't1').matches).toHaveLength(15);
   });
 
   it('adds court and referee', () => {

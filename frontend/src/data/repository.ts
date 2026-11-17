@@ -11,7 +11,7 @@ import type {
   TournamentRegistration,
 } from '../domain/types';
 
-export const DEMO_STORAGE_KEY = 'coachmate-demo-state-v2';
+export const DEMO_STORAGE_KEY = 'coachmate-demo-state-v3';
 export const LEGACY_STORAGE_KEY = 'coachmate-cp3-mvp-v1';
 
 export interface StorageLike {

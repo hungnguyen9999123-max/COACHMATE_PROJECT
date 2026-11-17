@@ -12,7 +12,7 @@ describe('financial preservation rules', () => {
       coursePaymentFees: 420_000,
       subscriptionRevenue: 99_000,
       tournamentRevenue: 0,
-      heldTournamentFees: 3_450_000,
+      heldTournamentFees: 5_200_000,
       tournamentPaymentFees: 0,
       tournamentOperatingCosts: 0,
       platformRevenue: 2_199_000,
@@ -35,12 +35,12 @@ describe('financial preservation rules', () => {
     );
 
     expect(first).toMatchObject({
-      registrationCount: 9,
-      revenue: 2_250_000,
-      paymentFee: 45_000,
-      refereeCost: 480_000,
+      registrationCount: 16,
+      revenue: 4_000_000,
+      paymentFee: 80_000,
+      refereeCost: 900_000,
       fixedCost: 4_400_000,
-      estimatedProfit: -2_675_000,
+      estimatedProfit: -1_380_000,
       breakEvenRegistrations: 24,
       contributionPerRegistration: 185_000,
     });
@@ -74,6 +74,6 @@ describe('financial preservation rules', () => {
     const registrations = state.tournamentRegistrations.map((registration, index) =>
       index === 0 ? { ...registration, reviewStatus: 'rejected' as const } : registration,
     );
-    expect(calculateTournamentEconomics(state.tournaments[0], registrations, 2).registrationCount).toBe(8);
+    expect(calculateTournamentEconomics(state.tournaments[0], registrations, 2).registrationCount).toBe(15);
   });
 });

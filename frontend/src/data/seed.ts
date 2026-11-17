@@ -370,23 +370,44 @@ function createTournamentRegistrations(students: Student[]): TournamentRegistrat
   const seedClubs = ['CLB Bình Minh', 'CLB Sao Mai', 'CLB Phú Nhuận', 'CLB Thăng Long'];
   const seedLevels: SkillLevel[] = ['Nâng cao', 'Trung cấp', 'Cơ bản', 'Mới bắt đầu'];
 
-  for (let index = 0; index < 9; index += 1) {
-    const name = PARTICIPANT_NAMES[(index * 2 + 1) % PARTICIPANT_NAMES.length];
+  // Mini Cup #1: 16 VĐV, 4 CLB x 4 người, đủ 5 Nâng cao - 5 Trung cấp - 3 Cơ bản - 3 Mới bắt đầu
+  // để AI xếp cặp có thể tránh trùng CLB ở vòng 1 và chia đều các cặp trình độ.
+  const miniCupEntrants: Array<{ name: string; skillLevel: SkillLevel; club: string }> = [
+    { name: 'Phạm Gia Huy', skillLevel: 'Nâng cao', club: 'CLB Bình Minh' },
+    { name: 'Võ Thanh Trúc', skillLevel: 'Nâng cao', club: 'CLB Sao Mai' },
+    { name: 'Đặng Minh Quân', skillLevel: 'Nâng cao', club: 'CLB Phú Nhuận' },
+    { name: 'Bùi Ngọc Anh', skillLevel: 'Nâng cao', club: 'CLB Thăng Long' },
+    { name: 'Hoàng Đức Long', skillLevel: 'Nâng cao', club: 'CLB Bình Minh' },
+    { name: 'Ngô Khánh Linh', skillLevel: 'Trung cấp', club: 'CLB Sao Mai' },
+    { name: 'Lý Anh Tuấn', skillLevel: 'Trung cấp', club: 'CLB Phú Nhuận' },
+    { name: 'Đỗ Hải Yến', skillLevel: 'Trung cấp', club: 'CLB Thăng Long' },
+    { name: 'Trịnh Bảo Châu', skillLevel: 'Trung cấp', club: 'CLB Bình Minh' },
+    { name: 'Vũ Quang Vinh', skillLevel: 'Trung cấp', club: 'CLB Sao Mai' },
+    { name: 'Kim Ngân', skillLevel: 'Cơ bản', club: 'CLB Phú Nhuận' },
+    { name: 'Tô Hoài Nam', skillLevel: 'Cơ bản', club: 'CLB Thăng Long' },
+    { name: 'Lương Bích Ngọc', skillLevel: 'Cơ bản', club: 'CLB Bình Minh' },
+    { name: 'Ông Gia Khiêm', skillLevel: 'Mới bắt đầu', club: 'CLB Sao Mai' },
+    { name: 'Quách Mỹ Linh', skillLevel: 'Mới bắt đầu', club: 'CLB Phú Nhuận' },
+    { name: 'Thái Đình Phong', skillLevel: 'Mới bắt đầu', club: 'CLB Thăng Long' },
+  ];
+
+  miniCupEntrants.forEach((entrant, index) => {
     registrations.push({
       id: `r${index + 1}`,
       tournamentId: 't1',
-      studentId: students.find((student) => student.name === name)?.id,
-      participantName: name,
+      studentId: students.find((student) => student.name === entrant.name)?.id,
+      participantName: entrant.name,
       partnerName: '',
       isCurrentStudent: false,
       fee: 250_000,
       paymentFee: 5_000,
       createdAt: `2026-10-${String(11 + index).padStart(2, '0')}T14:00:00+07:00`,
       paymentId: `pay-tournament-${index + 1}`,
-      skillLevel: seedLevels[index % seedLevels.length],
-      club: seedClubs[(index * 2) % seedClubs.length],
+      reviewStatus: 'approved',
+      skillLevel: entrant.skillLevel,
+      club: entrant.club,
     });
-  }
+  });
 
   for (let index = 0; index < 3; index += 1) {
     const name = PARTICIPANT_NAMES[index + 10];
@@ -525,7 +546,7 @@ export function createSeedState(): DemoState {
         fee: 250_000,
         registrationDeadline: '2026-11-25',
         maxRegistrations: 32,
-        minRegistrations: 20,
+        minRegistrations: 16,
         courtCount: 4,
         prize: 'Cúp, huy chương và 1.500.000đ tiền thưởng',
         rules: 'Đơn nam/nữ phong trào, thi đấu loại trực tiếp, 21 điểm, 3 set.',
